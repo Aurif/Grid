@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>GRID</title>
+    <style>
+        svg {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        #letters>text {
+            fill: orange;
+            font-family: monospace;
+            letter-spacing: var(--spacing-x);
+
+        }
+    </style>
+</head>
+
+<body>
+    <svg id="letters">
+        <defs>
+            <mask>
+            </mask>
+        </defs>
+        <rect width="100%" height="100%" fill="black" mask="url(#letters)" />
+    </svg>
+
+
+    <script>
+        const letterSize = 20;
+        function fillGrid() {
+            let mx = 100, my = 50;
+            let randomAsciiCharacter = () => String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+
+            let html = ''
+            for (var y = 0; y < my; y++) {
+                let text = '';
+                for (var x = 0; x < mx; x++) text += randomAsciiCharacter();
+                html += `<text dy="${letterSize / 1.43}px" style="transform: translate(var(--spacing-x), calc((${letterSize}px + 100vh) * ${((y + 1) / (my + 1)).toFixed(3)} - ${letterSize}px))">${text}</text>`
+            }
+
+            let container = document.getElementById('letters')
+            container.innerHTML = html;
+            container.style.setProperty('font-size', `${letterSize}px`);
+            container.style.setProperty('--spacing-x', `calc((100vw - ${mx * letterSize}px / 1.816)/${mx + 1})`);
+            container.style.setProperty('--spacing-y', `calc((100vh - ${my * letterSize}px)/${my + 1})`);
+        }
+
+        fillGrid();
+    </script>
+</body>
+
+</html>
