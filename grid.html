@@ -5,6 +5,9 @@
     <meta charset="utf-8">
     <title>GRID</title>
     <style>
+        body {
+            background: #2e2d35;
+        }
         svg {
             width: 100vw;
             height: 100vh;
@@ -14,10 +17,13 @@
         }
 
         #letters>text {
-            fill: orange;
+            fill: black;
             font-family: monospace;
             letter-spacing: var(--spacing-x);
 
+        }
+        #letters>rect {
+            fill: white;
         }
     </style>
 </head>
@@ -25,10 +31,17 @@
 <body>
     <svg>
         <defs>
-            <mask id="letters">
-            </mask>
+            <mask id="letters"></mask>
+            <radialGradient id="flashlightGradient" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stop-color="rgba(255, 239, 202, 1)" />
+                <stop offset="10%" stop-color="rgba(255, 239, 202, 1)" />
+                <stop offset="25%" stop-color="rgba(249, 220, 144, 0.4)" />
+                <stop offset="100%" stop-color="transparent" />
+            </radialGradient>
         </defs>
-        <rect width="100%" height="100%" fill="black" mask="url(#letters)" />
+        <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)" opacity="0.5"></rect>
+        <rect width="100%" height="100%" fill="#171a2b" mask="url(#letters)" />
+        <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)" opacity="0.02"></rect>
     </svg>
 
 
@@ -38,6 +51,13 @@
         const yScale = 1.34;
         function initialize() {
             window.addEventListener('resize', fillGrid);
+            window.addEventListener('mousemove', (e)=>{
+                let flashlights = document.getElementsByClassName('flashlight');
+                for(let f of flashlights) {
+                    f.setAttribute('x', e.clientX - 600);
+                    f.setAttribute('y', e.clientY - 600);
+                }
+            });
             fillGrid();
         }
         initialize();
@@ -47,7 +67,7 @@
             let my = Math.floor(window.innerHeight/(letterSize/yScale));
             let randomAsciiCharacter = () => String.fromCharCode(Math.floor(Math.random() * 26) + 65);
 
-            let html = ''
+            let html = '<rect width="100%" height="100%" />'
             for (var y = 0; y < my; y++) {
                 let text = '';
                 for (var x = 0; x < mx; x++) text += randomCharacter();
