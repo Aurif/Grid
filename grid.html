@@ -15,13 +15,16 @@
             left: 0;
             top: 0;
         }
+        .flashlight {
+            --opacity-multiplier: 0;
+        }
 
         #letters>text {
             fill: black;
             font-family: monospace;
             letter-spacing: var(--spacing-x);
-
         }
+
         #letters>rect {
             fill: white;
         }
@@ -39,9 +42,9 @@
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
         </defs>
-        <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)" opacity="0.5"></rect>
+        <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)" style="opacity: calc(var(--opacity-multiplier) * 0.7)"></rect>
         <rect width="100%" height="100%" fill="#171a2b" mask="url(#letters)" />
-        <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)" opacity="0.02"></rect>
+        <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)" style="opacity: calc(var(--opacity-multiplier) * 0.05)"></rect>
     </svg>
 
 
@@ -52,10 +55,19 @@
         function initialize() {
             window.addEventListener('resize', fillGrid);
             window.addEventListener('mousemove', (e)=>{
+                const deadzone = 0.005;
+                const margin = 0.04;
+                const maxOpacity = 0.5;
+                let windowSize = {width: window.innerWidth, height: window.innerHeight};
                 let flashlights = document.getElementsByClassName('flashlight');
                 for(let f of flashlights) {
                     f.setAttribute('x', e.clientX - 600);
                     f.setAttribute('y', e.clientY - 600);
+                    let posX = e.clientX/windowSize.width;
+                    let posY = e.clientY/windowSize.height;
+                    // Change css var to change opacity
+                    let newOpacity = Math.max(0, Math.min(1, (posX-deadzone)/(margin-deadzone), (posY-deadzone)/(margin-deadzone), (1-posX-deadzone)/(margin-deadzone), (1-posY-deadzone)/(margin-deadzone)));
+                    f.style.setProperty('--opacity-multiplier', newOpacity);
                 }
             });
             fillGrid();
