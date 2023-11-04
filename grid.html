@@ -103,7 +103,7 @@
             let my = Math.floor(window.innerHeight / (letterSize / yScale) / 1.7);
 
             var _words = []
-            for (let i = 0; i < 10; i++) _words.push("WORD");
+            for (let i = 0; i < 100; i++) _words.push("WORD");
             let grid = fillGrid(mx, my, _words)
 
             function randomCharacter() {
@@ -138,10 +138,10 @@
                 let mi, si // Main and secondary axis
                 let generatePos = () => {
                     mi = Math.floor(1 + Math.random() * ((horizontal ? mx : my) - word.length - 1));
-                    si = Math.floor(1 + Math.random() * ((horizontal ? my : mx) - 1));
+                    si = Math.floor(1 + Math.random() * ((horizontal ? my : mx) - 2));
                 }
-                let posToKey = (offset) => {
-                    return horizontal ? `${mi + offset}:${si}` : `${si}:${mi + offset}`;
+                let posToKey = (offset, suboffset=0) => {
+                    return horizontal ? `${mi + offset}:${si + suboffset}` : `${si + suboffset}:${mi + offset}`;
                 }
 
                 let isPosValid = () => {
@@ -149,6 +149,7 @@
                     let overlap = true;
                     for (let i = 0; i < word.length; i++) {
                         if (grid[posToKey(i)] && grid[posToKey(i)] != word[i]) return false;
+                        if (!grid[posToKey(i)]) for (let j of [-1, 1]) if (grid[posToKey(i, j)]) return false;
                         if (!grid[posToKey(i)]) overlap = false;
                     }
                     if (overlap) return false;
