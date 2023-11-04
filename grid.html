@@ -21,14 +21,21 @@
             --opacity-multiplier: 0;
         }
 
-        #letters>text {
-            fill: black;
+        .letters {
             font-family: monospace;
             letter-spacing: var(--spacing-x);
+            white-space: break-spaces;
+            transform: translate(var(--spacing-x), var(--spacing-y));
+            dominant-baseline: hanging;
         }
 
-        #letters>rect {
-            fill: white;
+        #lettersBackdrop {
+            fill: black;
+        }
+
+        #lettersContent {
+            fill: rgb(255, 242, 211);
+            filter: url(#glow);
         }
     </style>
 </head>
@@ -36,17 +43,28 @@
 <body>
     <svg>
         <defs>
-            <mask id="letters"></mask>
+            <mask id="lettersMask">
+                <rect width="100%" height="100%" style="fill: white" />
+                <text id="lettersBackdrop" class="letters"></text>
+            </mask>
             <radialGradient id="flashlightGradient" cx="0.5" cy="0.5" r="0.5">
                 <stop offset="0%" stop-color="rgba(255, 239, 202, 1)" />
                 <stop offset="10%" stop-color="rgba(255, 239, 202, 1)" />
                 <stop offset="25%" stop-color="rgba(249, 220, 144, 0.4)" />
                 <stop offset="100%" stop-color="transparent" />
             </radialGradient>
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
         </defs>
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.7)"></rect>
-        <rect width="100%" height="100%" fill="#171a2b" mask="url(#letters)" />
+        <rect width="100%" height="100%" fill="#171a2b" mask="url(#lettersMask)" />
+        <text id="lettersContent" class="letters"></text>
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.05)"></rect>
     </svg>
@@ -81,36 +99,40 @@
         initialize();
 
         function renderGrid() {
-            let mx = Math.floor(window.innerWidth / (letterSize / xScale));
-            let my = Math.floor(window.innerHeight / (letterSize / yScale));
+            let mx = Math.floor(window.innerWidth / (letterSize / xScale) / 1.7);
+            let my = Math.floor(window.innerHeight / (letterSize / yScale) / 1.7);
 
             var _words = []
             for (let i = 0; i < 10; i++) _words.push("WORD");
             let grid = fillGrid(mx, my, _words)
 
-            let html = '<rect width="100%" height="100%" />'
-            for (var y = 0; y < my; y++) {
-                let text = '';
-                for (var x = 0; x < mx; x++) {
-                    if (grid[`${x}:${y}`]) text += grid[`${x}:${y}`].toUpperCase();
-                    else text += randomCharacter();
-                }
-                html += `<text dy="${letterSize / 1.43}px" style="transform: translate(var(--spacing-x), calc((${letterSize / yScale}px + 100vh) * ${((y + 1) / (my + 1)).toFixed(3)} - ${letterSize / yScale}px))">${text}</text>`
+            function randomCharacter() {
+                let alphabet = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890';
+                return alphabet[Math.floor(Math.random() * alphabet.length)];
             }
-
-            let container = document.getElementById('letters')
-            container.innerHTML = html;
-            container.style.setProperty('font-size', `${letterSize}px`);
-            container.style.setProperty('--spacing-x', `calc((100vw - ${mx * letterSize}px / ${xScale})/${mx + 1})`);
+            injectGridHtml(document.getElementById('lettersBackdrop'), grid, randomCharacter);
+            injectGridHtml(document.getElementById('lettersContent'), grid, ()=>" ");
         }
 
-        function randomCharacter() {
-            let alphabet = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890';
-            return alphabet[Math.floor(Math.random() * alphabet.length)];
+        function injectGridHtml(container, wordGrid, fillerFunc) {
+            let text = '';
+            for (var y = 0; y < wordGrid["my"]; y++) {
+                for (var x = 0; x < wordGrid["mx"]; x++) {
+                    if (wordGrid[`${x}:${y}`]) text += wordGrid[`${x}:${y}`];
+                    else text += fillerFunc();
+                }
+                text += '\n';
+            }
+
+            container.innerHTML = text;
+            container.style.setProperty('font-size', `${letterSize}px`);
+            container.style.setProperty('line-height', `calc(${letterSize/yScale}px + var(--spacing-y))`);
+            container.style.setProperty('--spacing-x', `calc((100vw - ${wordGrid["mx"] * letterSize / xScale}px)/${wordGrid["mx"] + 1})`);
+            container.style.setProperty('--spacing-y', `calc((100vh - ${wordGrid["my"] * letterSize / yScale}px)/${wordGrid["my"] + 1})`);
         }
 
         function fillGrid(mx, my, words) {
-            let grid = {};
+            let grid = {mx, my};
             let horizontal = true;
             for (let word of words) {
                 let mi, si // Main and secondary axis
