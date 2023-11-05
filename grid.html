@@ -15,6 +15,7 @@
             position: fixed;
             left: 0;
             top: 0;
+            z-index: -1;
         }
 
         .flashlight {
@@ -36,6 +37,31 @@
         #lettersContent {
             fill: rgb(255, 242, 211);
             filter: url(#glow);
+        }
+
+        #text-input {
+            --input-font-size: calc(round(100px, calc(var(--row-height) * 2)) + var(--rows-odd) * var(--row-height));
+            position: fixed;
+            left: 0;
+            width: 100vw;
+            top: calc(50% - var(--input-font-size) / 2);
+            height: var(--input-font-size);
+            font-size: var(--input-font-size);
+            border: none;
+            outline: none;
+            color: #fffcf6;
+            caret-color: #fff2d3;
+            text-align: center;
+            text-transform: uppercase;
+            font-family: monospace;
+            transition: background-color 0.5s;
+            background-color: #171a2b;
+        }
+
+        #text-input:invalid {
+            caret-color: transparent;
+            color: transparent;
+            background-color: transparent;
         }
     </style>
 </head>
@@ -68,16 +94,17 @@
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.05)"></rect>
     </svg>
-
+    <input id="text-input" type="text" onblur="refocus()" auto-focus required>
 
     <script>
         const letterSize = 30;
         const xScale = 1.816;
         const yScale = 1.34;
-
+        let lastSize = {}
+        let words = []
 
         function initialize() {
-            window.addEventListener('resize', renderGrid);
+            window.addEventListener('resize', ()=>{renderGrid(false)});
             window.addEventListener('mousemove', (e) => {
                 const deadzone = 0.005;
                 const margin = 0.04;
@@ -94,17 +121,24 @@
                     f.style.setProperty('--opacity-multiplier', newOpacity);
                 }
             });
+            document.getElementsByTagName('body')[0].addEventListener("keydown", function(event) {
+                if (event.keyCode === 13) {
+                    event.preventDefault();
+                    onInput();
+                }
+            });
             renderGrid();
+            refocus();
         }
         initialize();
 
-        function renderGrid() {
+        function renderGrid(force=true) {
             let mx = Math.floor(window.innerWidth / (letterSize / xScale) / 1.7);
             let my = Math.floor(window.innerHeight / (letterSize / yScale) / 1.7);
+            if (!force && mx == lastSize["mx"] && my == lastSize["my"]) return;
+            lastSize = {mx, my};
 
-            var _words = []
-            for (let i = 0; i < 100; i++) _words.push("WORD");
-            let grid = fillGrid(mx, my, _words)
+            let grid = fillGrid(mx, my, words)
 
             function randomCharacter() {
                 let alphabet = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890';
@@ -112,6 +146,12 @@
             }
             injectGridHtml(document.getElementById('lettersBackdrop'), grid, randomCharacter);
             injectGridHtml(document.getElementById('lettersContent'), grid, ()=>" ");
+            
+            let body = document.getElementsByTagName('body')[0]
+            body.style.setProperty('--rows-odd', grid["my"] % 2);
+            body.style.setProperty('--spacing-x', `calc((100vw - ${grid["mx"] * letterSize / xScale}px)/${grid["mx"] + 1})`);
+            body.style.setProperty('--spacing-y', `calc((100vh - ${grid["my"] * letterSize / yScale}px)/${grid["my"] + 1})`);
+            body.style.setProperty('--row-height', `calc(${letterSize / yScale}px + var(--spacing-y))`);
         }
 
         function injectGridHtml(container, wordGrid, fillerFunc) {
@@ -131,9 +171,6 @@
 
             container.innerHTML = html;
             container.style.setProperty('font-size', `${letterSize}px`);
-            container.style.setProperty('line-height', `calc(${letterSize/yScale}px + var(--spacing-y))`);
-            container.style.setProperty('--spacing-x', `calc((100vw - ${wordGrid["mx"] * letterSize / xScale}px)/${wordGrid["mx"] + 1})`);
-            container.style.setProperty('--spacing-y', `calc((100vh - ${wordGrid["my"] * letterSize / yScale}px)/${wordGrid["my"] + 1})`);
         }
 
         function fillGrid(mx, my, words) {
@@ -169,6 +206,20 @@
                 horizontal = !horizontal;
             }
             return grid;
+        }
+
+
+
+        function refocus() {
+            let myInput = document.getElementById('text-input');
+            myInput.focus();
+            setTimeout(function() { myInput.focus(); }, 10);
+        }
+        function onInput() {
+            let myInput = document.getElementById('text-input');
+            words.push(myInput.value.toUpperCase());
+            myInput.value = "";
+            renderGrid();
         }
     </script>
 </body>
