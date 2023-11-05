@@ -94,14 +94,62 @@
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.05)"></rect>
     </svg>
-    <input id="text-input" type="text" onblur="refocus()" auto-focus required>
+    <input id="text-input" type="text" auto-focus required>
 
-    <script>
+    <script src="secret.js"></script>
+    <script type="module">
+        import { Octokit, App } from "https://esm.sh/octokit";
+        const octokit = new Octokit({ auth: token || localStorage.getItem("grid-token") });
+
         const letterSize = 30;
         const xScale = 1.816;
         const yScale = 1.34;
         let lastSize = {}
-        let words = []
+
+        
+        class MemoryManager {
+            constructor(id) {
+                this.id = id;
+                this.listeners = [];
+                this.entries = this.load();
+            }
+            async addEntry(entry) {
+                this.entries = await this.entries;
+                this.entries.push(entry);
+                this.listeners.forEach(l => l());
+                this.save();
+            }
+            getEntries() {
+                return this.entries;
+            }
+            addListener(listener) {
+                this.listeners.push(listener);
+                return this;
+            }
+            async load() {
+                let current = await octokit.request(`GET /gists/{gist_id}`, {
+                    gist_id: this.id,
+                    headers: {
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
+                })
+                return JSON.parse(current["data"]["files"]["grid.json"]["content"]);
+            }
+            async save() {
+                await octokit.request(`PATCH /gists/{gist_id}`, {
+                    gist_id: this.id,
+                    headers: {
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    },
+                    files: {
+                        "grid.json": {
+                            content: JSON.stringify(this.entries)
+                        }
+                    }
+                })
+            }
+        }
+        let memory = (new MemoryManager("a94543b500d8138b1564a90a59ce8b16")).addListener(() => renderGrid());
 
         function initialize() {
             window.addEventListener('resize', ()=>{renderGrid(false)});
@@ -127,18 +175,19 @@
                     onInput();
                 }
             });
+            document.getElementById('text-input').addEventListener("blur", refocus);
             renderGrid();
             refocus();
         }
         initialize();
 
-        function renderGrid(force=true) {
+        async function renderGrid(force=true) {
             let mx = Math.floor(window.innerWidth / (letterSize / xScale) / 1.7);
             let my = Math.floor(window.innerHeight / (letterSize / yScale) / 1.7);
             if (!force && mx == lastSize["mx"] && my == lastSize["my"]) return;
             lastSize = {mx, my};
 
-            let grid = fillGrid(mx, my, words)
+            let grid = fillGrid(mx, my, await memory.getEntries());
 
             function randomCharacter() {
                 let alphabet = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890';
@@ -176,6 +225,7 @@
         function fillGrid(mx, my, words) {
             let grid = {mx, my};
             let horizontal = true;
+            console.log(words)
             for (let word of words) {
                 let mi, si // Main and secondary axis
                 let generatePos = () => {
@@ -217,9 +267,9 @@
         }
         function onInput() {
             let myInput = document.getElementById('text-input');
-            words.push(myInput.value.toUpperCase());
+            if (myInput.value == "") return;
+            memory.addEntry(myInput.value.toUpperCase());
             myInput.value = "";
-            renderGrid();
         }
     </script>
 </body>
