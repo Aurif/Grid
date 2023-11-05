@@ -45,7 +45,7 @@
         <defs>
             <mask id="lettersMask">
                 <rect width="100%" height="100%" style="fill: white" />
-                <text id="lettersBackdrop" class="letters"></text>
+                <g id="lettersBackdrop" class="letters"></g>
             </mask>
             <radialGradient id="flashlightGradient" cx="0.5" cy="0.5" r="0.5">
                 <stop offset="0%" stop-color="rgba(255, 239, 202, 1)" />
@@ -64,7 +64,7 @@
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.7)"></rect>
         <rect width="100%" height="100%" fill="#171a2b" mask="url(#lettersMask)" />
-        <text id="lettersContent" class="letters"></text>
+        <g id="lettersContent" class="letters"></g>
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.05)"></rect>
     </svg>
@@ -115,16 +115,21 @@
         }
 
         function injectGridHtml(container, wordGrid, fillerFunc) {
-            let text = '';
+            let html = '';
             for (var y = 0; y < wordGrid["my"]; y++) {
+                let text = '';
                 for (var x = 0; x < wordGrid["mx"]; x++) {
-                    if (wordGrid[`${x}:${y}`]) text += wordGrid[`${x}:${y}`];
-                    else text += fillerFunc();
+                    let letter 
+                    if (wordGrid[`${x}:${y}`]) letter = wordGrid[`${x}:${y}`];
+                    else letter = fillerFunc();
+
+                    if (letter == " ") letter = "&nbsp;";
+                    text += letter;
                 }
-                text += '\n';
+                html += `<text x=0 style="transform: translate(0, calc(${letterSize/yScale*y}px + var(--spacing-y) * ${y}))">${text}</text>`;
             }
 
-            container.innerHTML = text;
+            container.innerHTML = html;
             container.style.setProperty('font-size', `${letterSize}px`);
             container.style.setProperty('line-height', `calc(${letterSize/yScale}px + var(--spacing-y))`);
             container.style.setProperty('--spacing-x', `calc((100vw - ${wordGrid["mx"] * letterSize / xScale}px)/${wordGrid["mx"] + 1})`);
