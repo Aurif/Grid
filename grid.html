@@ -105,6 +105,7 @@
         const xScale = 1.816;
         const yScale = 1.34;
         let lastSize = {}
+        let reverseMappping = {};
 
         
         class MemoryManager {
@@ -113,18 +114,24 @@
                 this.listeners = [];
                 this.entries = this.load();
             }
+            addListener(listener) {
+                this.listeners.push(listener);
+                return this;
+            }
+            getEntries() {
+                return this.entries;
+            }
             async addEntry(entry) {
                 this.entries = await this.entries;
                 this.entries.push(entry);
                 this.listeners.forEach(l => l());
                 this.save();
             }
-            getEntries() {
-                return this.entries;
-            }
-            addListener(listener) {
-                this.listeners.push(listener);
-                return this;
+            async removeEntry(index) {
+                this.entries = await this.entries;
+                this.entries.splice(index, 1);
+                this.listeners.forEach(l => l());
+                this.save();
             }
             async load() {
                 let current = await octokit.request(`GET /gists/{gist_id}`, {
@@ -176,6 +183,15 @@
                 }
             });
             document.getElementById('text-input').addEventListener("blur", refocus);
+            window.addEventListener('dblclick', async e => {
+                let spacingX = (window.innerWidth - (reverseMappping["mx"] * letterSize / xScale)) / (reverseMappping["mx"] + 1)
+                let spacingY = (window.innerHeight - (reverseMappping["my"] * letterSize / yScale)) / (reverseMappping["my"] + 1)
+                let x = Math.floor((e.clientX - spacingX / 2) / (letterSize / xScale + spacingX));
+                let y = Math.floor((e.clientY - spacingY / 2) / (letterSize / yScale + spacingY));
+                let target = reverseMappping[`${x}:${y}`];
+                if (target == undefined) return;
+                memory.removeEntry(target);
+            });
             renderGrid();
             refocus();
         }
@@ -224,9 +240,10 @@
 
         function fillGrid(mx, my, words) {
             let grid = {mx, my};
+            reverseMappping = {mx, my};
             let horizontal = true;
-            console.log(words)
-            for (let word of words) {
+            for (let w in words) {
+                let word = words[w];
                 let mi, si // Main and secondary axis
                 let generatePos = () => {
                     mi = Math.floor(1 + Math.random() * ((horizontal ? mx : my) - word.length - 1));
@@ -252,7 +269,10 @@
                 do { generatePos(); } while (!isPosValid() && maxTries-- > 0);
                 if (maxTries <= 0) continue;
 
-                for (let i = 0; i < word.length; i++) grid[posToKey(i)] = word[i];
+                for (let i = 0; i < word.length; i++) {
+                    grid[posToKey(i)] = word[i];
+                    reverseMappping[posToKey(i)] = w;
+                }
                 horizontal = !horizontal;
             }
             return grid;
