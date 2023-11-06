@@ -62,6 +62,7 @@
             caret-color: transparent;
             color: transparent;
             background-color: transparent;
+            cursor: default;
         }
     </style>
 </head>
@@ -125,10 +126,10 @@
                 this.listeners.forEach(l => l());
                 this.save();
             }
-            async removeEntry(index) {
+            async removeEntry(entry, silent=false) {
                 this.entries = await this.entries;
-                this.entries.splice(index, 1);
-                this.listeners.forEach(l => l());
+                this.entries.splice(this.entries.indexOf(entry), 1);
+                if (!silent) this.listeners.forEach(l => l());
                 this.save();
             }
             async load() {
@@ -158,8 +159,11 @@
             constructor(memoryManager) {
                 this.content = {};
                 this.size = {};
-                this.memory = memoryManager;
+                this.idMapping = {last: -1};
                 this.targets = [];
+
+                this.memory = memoryManager;
+                this.memory.addListener(this.repositionContent.bind(this));
             }
             bindTarget(target, charset) {
                 this.targets.push({target, charset});
@@ -169,14 +173,15 @@
                 if (mx == this.size["mx"] && my == this.size["my"]) return;
                 this.size = {mx, my};
                 await this.repositionContent();
-                this.buildHtml();
             }
             async repositionContent() {
+                this.idMapping = {last: -1};
                 this.content = {};
                 let words = await this.memory.getEntries();
-                for (let w in words) this.placeEntry(words[w], w);
+                for (let w of words) this.placeEntry(w);
+                this.buildHtml();
             }
-            placeEntry(entry, id) {
+            placeEntry(entry) {
                 let horizontal, mi, si // Main and secondary axis
                 let generatePos = () => {
                     horizontal = Math.random() > 0.5;
@@ -203,8 +208,13 @@
                 do { generatePos(); } while (!isPosValid() && maxTries-- > 0);
                 if (maxTries <= 0) return; // TODO: Can be improved with a cyclic shuffler
 
+                let id = ++this.idMapping.last;
+                this.idMapping[id] = entry;
                 for (let i = 0; i < entry.length; i++)
                     this.content[posToKey(i)] = [entry[i], id];
+            }
+            getById(id) {
+                return this.idMapping[id];
             }
             buildHtml() {
                 for (let t of this.targets) this.buildHtmlGrid(t.target, () => t.charset[Math.floor(Math.random() * t.charset.length)]);
@@ -240,8 +250,14 @@
                 y = Math.floor((y - spacingY / 2) / (letterSize / yScale + spacingY));
                 return this.content[`${x}:${y}`];
             }
+            overwritePosition(layer, x, y, letter) {
+                let row = this.targets[layer].target.getElementsByTagName('text')[y];
+                let content = row.innerHTML.replace(/&nbsp;/g, ' ');
+                let newContent = content.substr(0, x) + letter + content.substr(1*x + 1);
+                row.innerHTML = newContent.replace(/ /g, '&nbsp;');
+            }
         }
-        let memory = new MemoryManager("a94543b500d8138b1564a90a59ce8b16").addListener(() => renderGrid());
+        let memory = new MemoryManager("69c9f9c4b182ec941409e60f898d2caf");
         let grid = new GridManager(memory)
                     .bindTarget(document.getElementById('lettersBackdrop'), 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890')
                     .bindTarget(document.getElementById('lettersContent'), " ");
@@ -274,7 +290,15 @@
             window.addEventListener('dblclick', async e => {
                 let target = grid.getByScreenPos(e.clientX, e.clientY);
                 if (target == undefined) return;
-                memory.removeEntry(target[1]);
+
+                let positionToUpdate = []
+                for (let l in grid.content)
+                    if (grid.content[l][1] == target[1]) positionToUpdate.push(l.split(':'));
+                shuffleArray(positionToUpdate);
+                for (let i in positionToUpdate)
+                    setTimeout(grid.overwritePosition.bind(grid), 800/positionToUpdate.length*i, 1, positionToUpdate[i][0], positionToUpdate[i][1], ' ');
+
+                memory.removeEntry(grid.getById(target[1]), true);
             });
             renderGrid();
             refocus();
@@ -299,6 +323,16 @@
             if (myInput.value == "") return;
             memory.addEntry(myInput.value.toUpperCase());
             myInput.value = "";
+        }
+
+
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
         }
     </script>
 </body>
