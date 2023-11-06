@@ -104,8 +104,6 @@
         const letterSize = 30;
         const xScale = 1.816;
         const yScale = 1.34;
-        let lastSize = {}
-        let reverseMappping = {};
 
         
         class MemoryManager {
@@ -156,7 +154,97 @@
                 })
             }
         }
-        let memory = (new MemoryManager("a94543b500d8138b1564a90a59ce8b16")).addListener(() => renderGrid());
+        class GridManager {
+            constructor(memoryManager) {
+                this.content = {};
+                this.size = {};
+                this.memory = memoryManager;
+                this.targets = [];
+            }
+            bindTarget(target, charset) {
+                this.targets.push({target, charset});
+                return this;
+            }
+            async setSize(mx, my) {
+                if (mx == this.size["mx"] && my == this.size["my"]) return;
+                this.size = {mx, my};
+                await this.repositionContent();
+                this.buildHtml();
+            }
+            async repositionContent() {
+                this.content = {};
+                let words = await this.memory.getEntries();
+                for (let w in words) this.placeEntry(words[w], w);
+            }
+            placeEntry(entry, id) {
+                let horizontal, mi, si // Main and secondary axis
+                let generatePos = () => {
+                    horizontal = Math.random() > 0.5;
+                    mi = Math.floor(1 + Math.random() * ((horizontal ? this.size['mx'] : this.size['my']) - entry.length - 1));
+                    si = Math.floor(1 + Math.random() * ((horizontal ? this.size['my'] : this.size['mx']) - 2));
+                }
+                let posToKey = (offset, suboffset=0) => {
+                    return horizontal ? `${mi + offset}:${si + suboffset}` : `${si + suboffset}:${mi + offset}`;
+                }
+
+                let isPosValid = () => {
+                    if (this.content[posToKey(-1)] || this.content[posToKey(entry.length)]) return false;
+                    let overlap = true;
+                    for (let i = 0; i < entry.length; i++) {
+                        if (this.content[posToKey(i)] && this.content[posToKey(i)][0] != entry[i]) return false;
+                        if (!this.content[posToKey(i)]) for (let j of [-1, 1]) if (this.content[posToKey(i, j)]) return false;
+                        if (!this.content[posToKey(i)]) overlap = false;
+                    }
+                    if (overlap) return false;
+                    return true;
+                }
+
+                let maxTries = 1E4;
+                do { generatePos(); } while (!isPosValid() && maxTries-- > 0);
+                if (maxTries <= 0) return; // TODO: Can be improved with a cyclic shuffler
+
+                for (let i = 0; i < entry.length; i++)
+                    this.content[posToKey(i)] = [entry[i], id];
+            }
+            buildHtml() {
+                for (let t of this.targets) this.buildHtmlGrid(t.target, () => t.charset[Math.floor(Math.random() * t.charset.length)]);
+                
+                let body = document.getElementsByTagName('body')[0]
+                body.style.setProperty('--rows-odd', this.size["my"] % 2);
+                body.style.setProperty('--spacing-x', `calc((100vw - ${this.size["mx"] * letterSize / xScale}px)/${this.size["mx"] + 1})`);
+                body.style.setProperty('--spacing-y', `calc((100vh - ${this.size["my"] * letterSize / yScale}px)/${this.size["my"] + 1})`);
+                body.style.setProperty('--row-height', `calc(${letterSize / yScale}px + var(--spacing-y))`);
+            }
+            buildHtmlGrid(element, fillerFunc) {
+                let html = '';
+                for (var y = 0; y < this.size["my"]; y++) {
+                    let text = '';
+                    for (var x = 0; x < this.size["mx"]; x++) {
+                        let letter 
+                        if (this.content[`${x}:${y}`]) letter = this.content[`${x}:${y}`][0];
+                        else letter = fillerFunc();
+
+                        if (letter == " ") letter = "&nbsp;";
+                        text += letter;
+                    }
+                    html += `<text x=0 style="transform: translate(0, calc(${letterSize/yScale*y}px + var(--spacing-y) * ${y}))">${text}</text>`;
+                }
+
+                element.innerHTML = html;
+                element.style.setProperty('font-size', `${letterSize}px`);
+            }
+            getByScreenPos(x, y) {
+                let spacingX = (window.innerWidth - (this.size["mx"] * letterSize / xScale)) / (this.size["mx"] + 1)
+                let spacingY = (window.innerHeight - (this.size["my"] * letterSize / yScale)) / (this.size["my"] + 1)
+                x = Math.floor((x - spacingX / 2) / (letterSize / xScale + spacingX));
+                y = Math.floor((y - spacingY / 2) / (letterSize / yScale + spacingY));
+                return this.content[`${x}:${y}`];
+            }
+        }
+        let memory = new MemoryManager("a94543b500d8138b1564a90a59ce8b16").addListener(() => renderGrid());
+        let grid = new GridManager(memory)
+                    .bindTarget(document.getElementById('lettersBackdrop'), 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890')
+                    .bindTarget(document.getElementById('lettersContent'), " ");
 
         function initialize() {
             window.addEventListener('resize', ()=>{renderGrid(false)});
@@ -184,13 +272,9 @@
             });
             document.getElementById('text-input').addEventListener("blur", refocus);
             window.addEventListener('dblclick', async e => {
-                let spacingX = (window.innerWidth - (reverseMappping["mx"] * letterSize / xScale)) / (reverseMappping["mx"] + 1)
-                let spacingY = (window.innerHeight - (reverseMappping["my"] * letterSize / yScale)) / (reverseMappping["my"] + 1)
-                let x = Math.floor((e.clientX - spacingX / 2) / (letterSize / xScale + spacingX));
-                let y = Math.floor((e.clientY - spacingY / 2) / (letterSize / yScale + spacingY));
-                let target = reverseMappping[`${x}:${y}`];
+                let target = grid.getByScreenPos(e.clientX, e.clientY);
                 if (target == undefined) return;
-                memory.removeEntry(target);
+                memory.removeEntry(target[1]);
             });
             renderGrid();
             refocus();
@@ -200,82 +284,7 @@
         async function renderGrid(force=true) {
             let mx = Math.floor(window.innerWidth / (letterSize / xScale) / 1.7);
             let my = Math.floor(window.innerHeight / (letterSize / yScale) / 1.7);
-            if (!force && mx == lastSize["mx"] && my == lastSize["my"]) return;
-            lastSize = {mx, my};
-
-            let grid = fillGrid(mx, my, await memory.getEntries());
-
-            function randomCharacter() {
-                let alphabet = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890';
-                return alphabet[Math.floor(Math.random() * alphabet.length)];
-            }
-            injectGridHtml(document.getElementById('lettersBackdrop'), grid, randomCharacter);
-            injectGridHtml(document.getElementById('lettersContent'), grid, ()=>" ");
-            
-            let body = document.getElementsByTagName('body')[0]
-            body.style.setProperty('--rows-odd', grid["my"] % 2);
-            body.style.setProperty('--spacing-x', `calc((100vw - ${grid["mx"] * letterSize / xScale}px)/${grid["mx"] + 1})`);
-            body.style.setProperty('--spacing-y', `calc((100vh - ${grid["my"] * letterSize / yScale}px)/${grid["my"] + 1})`);
-            body.style.setProperty('--row-height', `calc(${letterSize / yScale}px + var(--spacing-y))`);
-        }
-
-        function injectGridHtml(container, wordGrid, fillerFunc) {
-            let html = '';
-            for (var y = 0; y < wordGrid["my"]; y++) {
-                let text = '';
-                for (var x = 0; x < wordGrid["mx"]; x++) {
-                    let letter 
-                    if (wordGrid[`${x}:${y}`]) letter = wordGrid[`${x}:${y}`];
-                    else letter = fillerFunc();
-
-                    if (letter == " ") letter = "&nbsp;";
-                    text += letter;
-                }
-                html += `<text x=0 style="transform: translate(0, calc(${letterSize/yScale*y}px + var(--spacing-y) * ${y}))">${text}</text>`;
-            }
-
-            container.innerHTML = html;
-            container.style.setProperty('font-size', `${letterSize}px`);
-        }
-
-        function fillGrid(mx, my, words) {
-            let grid = {mx, my};
-            reverseMappping = {mx, my};
-            let horizontal = true;
-            for (let w in words) {
-                let word = words[w];
-                let mi, si // Main and secondary axis
-                let generatePos = () => {
-                    mi = Math.floor(1 + Math.random() * ((horizontal ? mx : my) - word.length - 1));
-                    si = Math.floor(1 + Math.random() * ((horizontal ? my : mx) - 2));
-                }
-                let posToKey = (offset, suboffset=0) => {
-                    return horizontal ? `${mi + offset}:${si + suboffset}` : `${si + suboffset}:${mi + offset}`;
-                }
-
-                let isPosValid = () => {
-                    if (grid[posToKey(-1)] || grid[posToKey(word.length)]) return false;
-                    let overlap = true;
-                    for (let i = 0; i < word.length; i++) {
-                        if (grid[posToKey(i)] && grid[posToKey(i)] != word[i]) return false;
-                        if (!grid[posToKey(i)]) for (let j of [-1, 1]) if (grid[posToKey(i, j)]) return false;
-                        if (!grid[posToKey(i)]) overlap = false;
-                    }
-                    if (overlap) return false;
-                    return true;
-                }
-
-                let maxTries = 1E4;
-                do { generatePos(); } while (!isPosValid() && maxTries-- > 0);
-                if (maxTries <= 0) continue;
-
-                for (let i = 0; i < word.length; i++) {
-                    grid[posToKey(i)] = word[i];
-                    reverseMappping[posToKey(i)] = w;
-                }
-                horizontal = !horizontal;
-            }
-            return grid;
+            grid.setSize(mx, my);
         }
 
 
