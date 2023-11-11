@@ -35,8 +35,15 @@
         }
 
         #lettersContent {
-            fill: rgb(255, 242, 211);
-            filter: url(#glow);
+            fill: white;
+        }
+
+        #glowPattern .marker {
+            width: calc(var(--letter-width) * (var(--end-x) - var(--start-x) + 1));
+            height: calc(var(--row-height) * (var(--end-y) - var(--start-y) + 1));
+            transform: translate(calc(var(--spacing-x) / 2 + var(--start-x) * var(--letter-width)), calc(var(--spacing-y) / 2 + var(--start-y) * var(--row-height)));
+            fill: #9777e6;
+            transition: opacity 0.5s;
         }
 
         #text-input {
@@ -77,6 +84,14 @@
                 <rect width="100%" height="100%" style="fill: white" />
                 <g id="lettersBackdrop" class="letters"></g>
             </mask>
+            <mask id="lettersContentMask">
+                <rect width="100%" height="100%" style="fill: black" />
+                <g id="lettersContent" class="letters" filter="url(#glow)"></g>
+            </mask>
+            <pattern id="glowPattern" x="0" y="0" width="100%" height="100%">
+                <rect width="100%" height="100%" style="fill: #fff2d3" />
+                <g id="glowMarkers"></g>
+            </pattern>
             <radialGradient id="flashlightGradient" cx="0.5" cy="0.5" r="0.5">
                 <stop offset="0%" stop-color="rgba(255, 239, 202, 1)" />
                 <stop offset="10%" stop-color="rgba(255, 239, 202, 1)" />
@@ -94,6 +109,7 @@
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.7)"></rect>
         <rect width="100%" height="100%" fill="#171a2b" mask="url(#lettersMask)" />
+        <rect width="100%" height="100%" mask="url(#lettersContentMask)" fill="url(#glowPattern)"/>
         <g id="lettersContent" class="letters"></g>
         <rect class="flashlight" width="1200px" height="1200px" fill="url(#flashlightGradient)"
             style="opacity: calc(var(--opacity-multiplier) * 0.05)"></rect>
@@ -110,6 +126,30 @@
         const yScale = 1.34;
 
         
+        class Entry {
+            constructor(content) {
+                if (typeof content == 'string') this.content = [content, 0];
+                else this.content = content
+            }
+            serialize() {
+                return this.content;
+            }
+            get label() {
+                return this.content[0];
+            }
+            get flag() {
+                return this.content[1];
+            }
+            set flag(value) {
+                this.content[1] = value;
+            }
+            static make(label) {
+                return new Entry([label, 0]);
+            }
+            setPos(posFunc) {
+                this.pos = posFunc;
+            }
+        }
         class MemoryManager {
             constructor(id) {
                 this.id = id;
@@ -131,7 +171,7 @@
             }
             async removeEntry(entry, silent=false) {
                 this.entries = await this.entries;
-                this.entries.splice(this.entries.indexOf(entry), 1);
+                this.entries.splice(this.entries.map(e => e.label).indexOf(entry.label), 1);
                 if (!silent) this.listeners.forEach(l => l());
                 this.save();
             }
@@ -143,10 +183,11 @@
                         'X-GitHub-Api-Version': '2022-11-28'
                     }
                 })
-                return JSON.parse(current["data"]["files"]["grid.json"]["content"]);
+                return JSON.parse(current["data"]["files"]["grid.json"]["content"]).map(e => new Entry(e));
             }
             async save() {
                 if (this.id == "") return
+                this.entries = await this.entries;
                 await octokit.request(`PATCH /gists/{gist_id}`, {
                     gist_id: this.id,
                     headers: {
@@ -154,7 +195,7 @@
                     },
                     files: {
                         "grid.json": {
-                            content: JSON.stringify(this.entries)
+                            content: JSON.stringify(this.entries.map(e => e.serialize()))
                         }
                     }
                 })
@@ -187,11 +228,17 @@
                 this.buildHtml();
             }
             placeEntry(entry) {
-                let posToKey = this.findPositionForEntry(entry);
+                let label = entry.label;
+
+                let posToKey = this.findPositionForEntry(label);
+                entry.setPos(posToKey)
+
                 let id = ++this.idMapping.last;
                 this.idMapping[id] = entry;
-                for (let i = 0; i < entry.length; i++)
-                    this.set(...posToKey(i), entry[i], id);
+                entry.id = id;
+
+                for (let i = 0; i < label.length; i++)
+                    this.set(...posToKey(i), label[i], id);
                 return posToKey;
             }
             findPositionForEntry(entry) {
@@ -219,7 +266,6 @@
                     if (overlap) return false;
                     return true;
                 }
-
                 let maxTries = 1E4;
                 do { generatePos(); } while (!isPosValid() && maxTries-- > 0);
                 if (maxTries <= 0) return; // TODO: Can be improved with a cyclic shuffler
@@ -234,13 +280,16 @@
             getById(id) {
                 return this.idMapping[id];
             }
-            buildHtml() {
+            async buildHtml() {
                 for (let t of this.targets) this.buildHtmlGrid(t.target, () => t.charset[Math.floor(Math.random() * t.charset.length)]);
+                document.getElementById('glowMarkers').innerHTML = '';
+                for(let entry of await this.memory.getEntries()) if(entry.flag == 1) this.addMarker(entry);
                 
                 let body = document.getElementsByTagName('body')[0]
                 body.style.setProperty('--rows-odd', this.size["my"] % 2);
                 body.style.setProperty('--spacing-x', `calc((100vw - ${this.size["mx"] * letterSize / xScale}px)/${this.size["mx"] + 1})`);
                 body.style.setProperty('--spacing-y', `calc((100vh - ${this.size["my"] * letterSize / yScale}px)/${this.size["my"] + 1})`);
+                body.style.setProperty('--letter-width', `calc(${letterSize / xScale}px + var(--spacing-x))`);
                 body.style.setProperty('--row-height', `calc(${letterSize / yScale}px + var(--spacing-y))`);
             }
             buildHtmlGrid(element, fillerFunc) {
@@ -260,6 +309,18 @@
 
                 element.innerHTML = html;
                 element.style.setProperty('font-size', `${letterSize}px`);
+            }
+            addMarker(entry) {
+                let start = entry.pos(0);
+                let end = entry.pos(entry.label.length-1);
+                let marker = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                marker.setAttribute('id', `marker-${entry.id}`)
+                marker.setAttribute('class', `marker remove-with-${entry.id}`);
+                marker.style.setProperty('--start-x', start[0]);
+                marker.style.setProperty('--start-y', start[1]);
+                marker.style.setProperty('--end-x', end[0]);
+                marker.style.setProperty('--end-y', end[1]);
+                document.getElementById('glowMarkers').appendChild(marker);
             }
             getByScreenPos(x, y) {
                 let spacingX = (window.innerWidth - (this.size["mx"] * letterSize / xScale)) / (this.size["mx"] + 1)
@@ -290,11 +351,15 @@
                 shuffleArray(positionToUpdate);
                 for (let i in positionToUpdate)
                     setTimeout(this.grid.overwritePosition.bind(this.grid), 800/positionToUpdate.length*i, 1, positionToUpdate[i][0], positionToUpdate[i][1], ' ');
+                setTimeout(() => {
+                    for(let e of document.getElementsByClassName(`remove-with-${id}`)) e.remove();
+                }, 800);
             }
             add(entry) {
                 let marks = [];
                 let contentMark = {}
                 let posToKey = this.grid.placeEntry(entry);
+                entry = entry.label;
                 let mark = (m, s, count, force=false) => {
                     let pos = posToKey(m, s);
                     if (!force && this.grid.get(...pos)) return;
@@ -335,11 +400,43 @@
                 }
             }
         }
+        class InputManager {
+            constructor(memoryManager, gridManager, animationManager) {
+                this.animation = animationManager;
+                this.memory = memoryManager;
+                this.grid = gridManager;
+            }
+            init() {
+                window.addEventListener('mousedown', e => {
+                    if (e.button != 0) return;
+                    this.longPress = setTimeout(() => {this.onLongPress(e)}, 900);
+                });
+                window.addEventListener('mouseup', e => {
+                    if (e.button != 0) return;
+                    clearTimeout(this.longPress);
+                });
+            }
+            onLongPress(e) {
+                let target = this.grid.getByScreenPos(e.clientX, e.clientY);
+                if (target == undefined) return;
+                this.grid.getById(target[1]).flag = 1-this.grid.getById(target[1]).flag;
+                this.memory.save();
+                if (this.grid.getById(target[1]).flag == 0) {
+                    document.getElementById(`marker-${target[1]}`).style.setProperty('opacity', 0);
+                    setTimeout(() => {document.getElementById(`marker-${target[1]}`).remove();}, 500);
+                } else {
+                    this.grid.addMarker(this.grid.getById(target[1]));
+                    document.getElementById(`marker-${target[1]}`).style.setProperty('opacity', 0);
+                    setTimeout(() => {document.getElementById(`marker-${target[1]}`).style.setProperty('opacity', 1)}, 100);
+                }
+            }
+        }
         let memory = new MemoryManager("a94543b500d8138b1564a90a59ce8b16");
         let grid = new GridManager(memory)
                     .bindTarget(document.getElementById('lettersBackdrop'), 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890')
                     .bindTarget(document.getElementById('lettersContent'), " ");
         let animation = new AnimationManager(grid)
+        let input = new InputManager(memory, grid, animation);
 
         function initialize() {
             window.addEventListener('resize', ()=>{renderGrid(false)});
@@ -371,6 +468,7 @@
                 animation.hide(target[1])
                 memory.removeEntry(grid.getById(target[1]), true);
             });
+            input.init();
             renderGrid();
             refocus();
         }
@@ -392,7 +490,7 @@
         function onInput() {
             let myInput = document.getElementById('text-input');
             if (myInput.value == "") return;
-            let entry = myInput.value.toUpperCase();
+            let entry = Entry.make(myInput.value.toUpperCase());
             myInput.value = "";
             memory.addEntry(entry, true);
             animation.add(entry);
