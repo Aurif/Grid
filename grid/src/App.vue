@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import GridRenderer from './renderer/GridRenderer.vue'
+import InputRenderer from './renderer/InputRenderer.vue'
+
+import { determinePositioning } from './renderer/positioning'
+const { rows, columns } = determinePositioning()
 </script>
 
 <template>
-  <GridRenderer/>
+  <GridRenderer :rows="rows" :columns="columns"/>
+  <InputRenderer :rows="rows"/>
 </template>
 
 <style>
