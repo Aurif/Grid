@@ -1,5 +1,18 @@
 <script setup lang="ts">
-    defineProps(['rows', 'columns'])
+    import { ref } from 'vue'
+    import GridUpdater from './grid-updater';
+
+    const props = defineProps<{
+        rows: number, 
+        columns: number, 
+        bind?: GridUpdater
+    }>()
+
+    const chars = ref<{[id: string]: HTMLSpanElement}>({})
+    props.bind?.bind((x, y) => {
+        if (x < 0 || x >= props.columns || y < 0 || y >= props.rows) throw new Error('Out of bounds');
+        return chars.value[x+':'+y]
+    })
 
     function randomChar() {
         let charset = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890';
@@ -10,7 +23,7 @@
 <template>
     <div class="parent">
         <div class="row" v-for="y in rows*1">
-            <span v-for="x in columns*1">
+            <span v-for="x in columns*1" :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)">
                 {{ randomChar() }}
             </span>
         </div>
@@ -34,5 +47,6 @@
         font-family: 'Roboto Mono', monospace;
         opacity: 0.1;
         user-select: none;
+        width: 16px;
     }
 </style>

@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import GridRenderer from './renderer/GridRenderer.vue'
-import InputRenderer from './renderer/InputRenderer.vue'
-
-import { determinePositioning } from './renderer/positioning'
+import GridRenderer from './view/GridRenderer.vue'
+import InputRenderer from './view/InputRenderer.vue'
+import { determinePositioning } from './input/positioning'
 const { rows, columns } = determinePositioning()
+
+import GridUpdater from './view/grid-updater';
+const gridUpdater = new GridUpdater()
+
+import ScatterModel from './model/scatter-model'
+const scatterModel = new ScatterModel(gridUpdater.setChar)
 </script>
 
 <template>
-  <GridRenderer :rows="rows" :columns="columns"/>
-  <InputRenderer :rows="rows"/>
+  <GridRenderer :rows="rows" :columns="columns" :bind="gridUpdater"/>
+  <InputRenderer :rows="rows" @onNewEntry="scatterModel.onNewEntry"/>
 </template>
 
 <style>

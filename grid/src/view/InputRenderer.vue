@@ -1,13 +1,31 @@
 <script setup lang="ts">
     import { ref, onMounted, onUnmounted, computed } from 'vue'
+    const emit = defineEmits(['onNewEntry'])
     const input = ref<HTMLInputElement | null>(null)
-    
+
     function refocus() {
         input.value?.focus();
         setTimeout(function() { input.value?.focus(); }, 10);
     }
-    onMounted(() => {refocus(); input.value?.addEventListener('blur', refocus)})
-    onUnmounted(() => input.value?.removeEventListener('blur', refocus))
+    function onInput(event: KeyboardEvent) {
+        if (event.keyCode !== 13) return;
+        event.preventDefault();
+
+        let value = input.value?.value.toUpperCase();
+        input.value!.value = '';
+        if (value) emit('onNewEntry', value);
+    }
+    onMounted(() => {
+        refocus(); 
+        input.value!.addEventListener('blur', refocus);
+        window.addEventListener("focus", refocus)
+        document.getElementsByTagName('body')[0].addEventListener("keydown", onInput)
+    })
+    onUnmounted(() => {
+        input.value!.removeEventListener('blur', refocus)
+        window.removeEventListener("focus", refocus)
+        document.getElementsByTagName('body')[0].removeEventListener("keydown", onInput)
+    })
 
     let props = defineProps(['rows'])
     let inputHeight = computed(() => window.innerHeight/props.rows*(props.rows % 2 ? 3 : 2))
