@@ -10,7 +10,7 @@
 
     const chars = ref<{[id: string]: HTMLSpanElement}>({})
     props.bind?.bind((x, y) => {
-        if (x < 0 || x >= props.columns || y < 0 || y >= props.rows) throw new Error('Out of bounds');
+        if (x < 0 || x >= props.columns || y < 0 || y >= props.rows) throw new Error(`Out of bounds (${x}, ${y})`);
         return chars.value[x+':'+y]
     })
 
