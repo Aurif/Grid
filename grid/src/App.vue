@@ -7,8 +7,9 @@ const { rows, columns } = determinePositioning()
 import GridUpdater from './view/grid-updater';
 const gridUpdater = new GridUpdater()
 
+import { Command } from './common/command'
 import ScatterModel from './model/scatter-model'
-const scatterModel = new ScatterModel(gridUpdater.setChar)
+const scatterModel = new ScatterModel(Command.combine(gridUpdater.setChar, gridUpdater.enablePos))
 </script>
 
 <template>

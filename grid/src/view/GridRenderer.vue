@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { ref } from 'vue'
+    import { ref, watch } from 'vue'
     import GridUpdater from './grid-updater';
 
     const props = defineProps<{
@@ -14,16 +14,19 @@
         return chars.value[x+':'+y]
     })
 
+    let state = 0
+    watch(() => [props.rows, props.columns], () => {state++})
+
     function randomChar() {
-        let charset = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890';
-        return charset.charAt(Math.floor(Math.random() * charset.length));
+        let charset = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890'.split('');
+        return charset[Math.floor(Math.random() * charset.length)];
     }
 </script>
 
 <template>
     <div class="parent">
         <div class="row" v-for="y in rows*1">
-            <span v-for="x in columns*1" :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)">
+            <span v-for="x in columns*1" :key="state+':'+(x-1)+':'+(y-1)" :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)">
                 {{ randomChar() }}
             </span>
         </div>
@@ -48,5 +51,10 @@
         opacity: 0.1;
         user-select: none;
         width: 16px;
+    }
+    span.active {
+        opacity: 1;
+        color: #eee683;
+        text-shadow: 0 0 4px #eee683;
     }
 </style>

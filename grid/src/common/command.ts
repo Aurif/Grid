@@ -11,3 +11,11 @@ export function command(target: any, key: string) {
         enumerable: true,
     });
 }
+
+export class Command {
+    static combine(...commands: ((...args: any[])=>void)[]) {
+        return (...args: any[]) => {
+            for (let c of commands) c(...args);
+        }
+    }
+}
