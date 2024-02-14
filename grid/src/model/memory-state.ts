@@ -7,13 +7,15 @@ export default class MemoryState {
     
     constructor(trigger: Ref | Ref[], listeners: ((entry: string) => void)[]) {
         this.listeners = listeners;
-        watch(trigger, () => {
-            for (let entry of this.entries) {
-                for (let listener of this.listeners) {
-                    listener(entry);
-                }
+        watch(trigger, () => this.fullListenerBroadcast(), { flush: 'post' });
+    }
+
+    fullListenerBroadcast() {
+        for (let entry of this.entries) {
+            for (let listener of this.listeners) {
+                listener(entry);
             }
-        }, { flush: 'post' });
+        }
     }
 
     @command

@@ -6,7 +6,7 @@
   import GridUpdater from './view/grid-updater';
   import { Command } from './common/command'
   import ScatterModel from './model/scatter-model'
-  import MemoryState from './model/memory-state';
+  import MemoryStateGist from './model/memory-state-gist';
 
 
   const { rows, columns } = determinePositioning()
@@ -14,7 +14,7 @@
 
   const gridUpdater = new GridUpdater()
   const scatterModel = new ScatterModel(Command.combine(gridUpdater.setChar, gridUpdater.enablePos, displayState.setAt), displayState.reader)
-  const memoryState = new MemoryState([rows, columns], [scatterModel.displayEntry])
+  const memoryState = new MemoryStateGist([rows, columns], [scatterModel.displayEntry])
 </script>
 
 <template>
