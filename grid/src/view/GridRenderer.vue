@@ -14,8 +14,8 @@
         return chars.value[x+':'+y]
     })
 
-    let state = 0
-    watch(() => [props.rows, props.columns], () => {state++})
+    let stateId = 0
+    watch(() => [props.rows, props.columns], () => {stateId++})
 
     function randomChar() {
         let charset = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890'.split('');
@@ -26,7 +26,7 @@
 <template>
     <div class="parent">
         <div class="row" v-for="y in rows*1">
-            <span v-for="x in columns*1" :key="state+':'+(x-1)+':'+(y-1)" :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)">
+            <span v-for="x in columns*1" :key="stateId+':'+(x-1)+':'+(y-1)" :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)">
                 {{ randomChar() }}
             </span>
         </div>

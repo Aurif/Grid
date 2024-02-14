@@ -1,11 +1,11 @@
 import { command } from '@/common/command';
-import type { StateReader } from './state';
+import type { DisplayStateReader } from './display-state';
 
 export default class ScatterModel {
     renderCommand: (x: number, y: number, char: string) => void;
-    state: StateReader;
+    state: DisplayStateReader;
 
-    constructor(renderCommand: (x: number, y: number, char: string) => void, state: StateReader) {
+    constructor(renderCommand: (x: number, y: number, char: string) => void, state: DisplayStateReader) {
         this.renderCommand = renderCommand;
         this.state = state;
     }
@@ -44,7 +44,7 @@ export default class ScatterModel {
     }
 
     @command
-    onNewEntry(entry: string) {
+    displayEntry(entry: string) {
         let pos = this.findPositionForEntry(entry);
         if (!pos) throw new Error('No position found');
         for(let [i, char] of entry.split('').entries()) this.renderCommand(...pos(i), char);

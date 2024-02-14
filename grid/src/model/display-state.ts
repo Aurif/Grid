@@ -2,7 +2,7 @@ import { command } from "@/common/command";
 import type { Ref } from "vue";
 import { watch } from 'vue'
 
-export default class State {
+export default class DisplayState {
     state: {[key: string]: string} = {};
     columns: Ref<number>;
     rows: Ref<number>;
@@ -21,14 +21,14 @@ export default class State {
     }
 
     get reader() {
-        return new StateReader(this);
+        return new DisplayStateReader(this);
     }
 }
 
-export class StateReader {
-    state: State;
+export class DisplayStateReader {
+    state: DisplayState;
 
-    constructor(state: State) {
+    constructor(state: DisplayState) {
         this.state = state;
     }
 
