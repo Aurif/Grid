@@ -52,6 +52,7 @@
     .row {
         display: flex;
         justify-content: space-evenly;
+        margin: 0 8px;
     }
     span {
         color: #ffffff;
@@ -60,6 +61,8 @@
         opacity: 0.1;
         user-select: none;
         width: 16px;
+        flex-grow: 1;
+        text-align: center;
     }
     span.active {
         opacity: 1;
