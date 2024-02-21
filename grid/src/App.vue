@@ -11,7 +11,7 @@
   import GridRendererProxy from "./view/grid-renderer-proxy"
   import type { ComponentRef } from './common/types';
   import DoubleClickInput from "./input/double-click";
-  import InputAcceptor from './input/input-acceptor';
+  import MultiInputProxy from './input/multi-input-proxy';
 
   const { rows, columns } = determinePositioning()
   const displayState = new DisplayState(rows, columns)
@@ -19,23 +19,17 @@
   const gridRenderer = ref() as ComponentRef<typeof GridRenderer>
   const gridRendererProxy = new GridRendererProxy(gridRenderer)
   
-  const doubleClickInput = new DoubleClickInput()
-  doubleClickInput.addListener(el => {
+  const gridInputProxy = new MultiInputProxy(el => {
     let pos = gridRendererProxy.spanToPos(el)
-    if (!pos) return
-    let acceptor = displayState.reader.getInputAcceptorAt(...pos)
-    if(acceptor) acceptor.trigger(doubleClickInput)
-  })
-  const GridInputAcceptor = new InputAcceptor()
-    .on(doubleClickInput, target => console.log(target.id))
+    if (pos) return displayState.reader.getInputAcceptorAt(...pos)
+  }).on(new DoubleClickInput(), target => console.log(target.id))
   
-
   const gridUpdater = new GridUpdater(gridRendererProxy)
   const scatterModel = new ScatterModel(
     Command.combine(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (x: number, y: number, value: string, owner: string) => displayState.setAt(x, y, value, GridInputAcceptor.spawn(owner))
+      (x: number, y: number, value: string, owner: string) => displayState.setAt(x, y, value, gridInputProxy.acceptor.spawn(owner))
     ), 
     displayState.reader
   )
