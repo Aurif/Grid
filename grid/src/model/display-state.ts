@@ -1,9 +1,10 @@
 import { command } from "@/common/command";
+import type { InputAcceptorSpawn } from "@/input/input-acceptor";
 import type { Ref } from "vue";
 import { watch } from 'vue'
 
 export default class DisplayState {
-    state: {[key: string]: string} = {};
+    state: {[key: string]: {value: string, inputAcceptor: InputAcceptorSpawn}} = {};
     columns: Ref<number>;
     rows: Ref<number>;
 
@@ -16,8 +17,8 @@ export default class DisplayState {
     }
 
     @command
-    setAt(x: number, y: number, value: string) {
-        this.state[`${x}:${y}`] = value;
+    setAt(x: number, y: number, value: string, inputAcceptor: InputAcceptorSpawn) {
+        this.state[`${x}:${y}`] = {value, inputAcceptor}
     }
 
     get reader() {
@@ -32,8 +33,12 @@ export class DisplayStateReader {
         this.state = state;
     }
 
-    getAt(x: number, y: number) {
-        return this.state.state[`${x}:${y}`];
+    getAt(x: number, y: number): string | undefined {
+        return this.state.state[`${x}:${y}`]?.value;
+    }
+
+    getInputAcceptorAt(x: number, y: number): InputAcceptorSpawn | undefined {
+        return this.state.state[`${x}:${y}`]?.inputAcceptor;
     }
 
     get columns() { return this.state.columns.value; }

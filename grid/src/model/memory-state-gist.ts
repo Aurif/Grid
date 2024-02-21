@@ -7,7 +7,7 @@ import { command } from "@/common/command";
 const octokit = new Octokit({ auth: gistToken });
 
 export default class MemoryStateGist extends MemoryState {
-    constructor(trigger: Ref | Ref[], listeners: ((entry: string) => void)[]) {
+    constructor(trigger: Ref | Ref[], listeners: ((entry: string, owner: string) => void)[]) {
         super(trigger, listeners);
         this.loadFromRemote().then(() => { this.fullListenerBroadcast(); });
     }
@@ -18,10 +18,10 @@ export default class MemoryStateGist extends MemoryState {
             headers: { 'X-GitHub-Api-Version': '2022-11-28' }
         })
 
-        let remoteData: string[] = []
+        let remoteData: {[id: string]: string} = {};
         try {
             // @ts-ignore
-            remoteData = JSON.parse(remoteDataRaw["data"]["files"]["grid.json"]["content"]).map(x => x[0])
+            remoteData = JSON.parse(remoteDataRaw["data"]["files"]["grid.json"]["content"])
         } catch (e) {
             throw new Error("Failed to parse remote data"+e)
         }
@@ -35,7 +35,7 @@ export default class MemoryStateGist extends MemoryState {
             headers: { 'X-GitHub-Api-Version': '2022-11-28' },
             files: {
                 "grid.json": {
-                    content: JSON.stringify(this.entries.map(e => [e, 0]))
+                    content: JSON.stringify(this.entries)
                 }
             }
         })

@@ -59,5 +59,6 @@
         color: transparent;
         background-color: transparent;
         cursor: default;
+        pointer-events: none;
     }
 </style>

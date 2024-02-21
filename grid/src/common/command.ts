@@ -13,9 +13,9 @@ export function command(target: any, key: string) {
 }
 
 export class Command {
-    static combine(...commands: ((...args: any[])=>void)[]) {
-        return (...args: any[]) => {
+    static combine<T extends (...args: any[])=>void>(...commands: T[]): T {
+        return ((...args: any[]) => {
             for (let c of commands) c(...args);
-        }
+        }) as T
     }
 }

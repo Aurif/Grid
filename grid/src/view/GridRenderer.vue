@@ -1,19 +1,12 @@
 <script setup lang="ts">
     import { ref, watch } from 'vue'
-    import GridUpdater from './grid-updater';
-
     const props = defineProps<{
         rows: number, 
-        columns: number, 
-        bind?: GridUpdater
+        columns: number
     }>()
+    let uid = Date.now()
 
     const chars = ref<{[id: string]: HTMLSpanElement}>({})
-    props.bind?.bind((x, y) => {
-        if (x < 0 || x >= props.columns || y < 0 || y >= props.rows) throw new Error(`Out of bounds (${x}, ${y})`);
-        return chars.value[x+':'+y]
-    })
-
     let stateId = 0
     watch(() => [props.rows, props.columns], () => {stateId++})
 
@@ -21,12 +14,28 @@
         let charset = 'ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890'.split('');
         return charset[Math.floor(Math.random() * charset.length)];
     }
+
+    function posToChar(x: number, y: number): HTMLSpanElement {
+        if (x < 0 || x >= props.columns || y < 0 || y >= props.rows) throw new Error(`Out of bounds (${x}, ${y})`);
+        return chars.value[x+':'+y]
+    }
+    function spanToPos(span: HTMLElement): [number, number] | undefined {
+        if (span.getAttribute("container-uid") != ''+uid) return
+        let posX = span.getAttribute("pos-x")
+        let posY = span.getAttribute("pos-y")
+        if (posX == null || posY == null) throw new Error("Corrupted grid element "+span)
+        return [parseInt(posX), parseInt(posY)]
+    }
+    defineExpose({posToChar, spanToPos})
 </script>
 
 <template>
     <div class="parent">
         <div class="row" v-for="y in rows*1">
-            <span v-for="x in columns*1" :key="stateId+':'+(x-1)+':'+(y-1)" :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)">
+            <span v-for="x in columns*1" :key="stateId+':'+(x-1)+':'+(y-1)" 
+                  :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)"
+                  :container-uid="uid" :pos-x="x-1" :pos-y="y-1"
+            >
                 {{ randomChar() }}
             </span>
         </div>
