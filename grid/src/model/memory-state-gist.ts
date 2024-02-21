@@ -7,12 +7,12 @@ import { command } from "@/common/command";
 const octokit = new Octokit({ auth: gistToken });
 
 export default class MemoryStateGist extends MemoryState {
-    constructor(trigger: Ref | Ref[], listeners: ((entry: string, owner: string) => void)[]) {
-        super(trigger, listeners);
+    constructor(trigger: Ref | Ref[]) {
+        super(trigger);
         this.loadFromRemote().then(() => { this.fullListenerBroadcast(); });
     }
 
-    async loadFromRemote() {
+    private async loadFromRemote() {
         let remoteDataRaw = await octokit.request(`GET /gists/{gist_id}`, {
             gist_id: gistId,
             headers: { 'X-GitHub-Api-Version': '2022-11-28' }
@@ -28,7 +28,7 @@ export default class MemoryStateGist extends MemoryState {
         this.entries = remoteData
     }
 
-    async pushToRemote() {
+    private async pushToRemote() {
         this.entries = await this.entries;
         await octokit.request(`PATCH /gists/{gist_id}`, {
             gist_id: gistId,
@@ -45,5 +45,11 @@ export default class MemoryStateGist extends MemoryState {
     addEntry(entry: string): void {
         super.addEntry(entry);
         this.pushToRemote();
+    }
+
+    @command
+    async removeEntry(eid: string) {
+        super.removeEntry(eid);
+        await this.pushToRemote();
     }
 }

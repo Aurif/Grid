@@ -19,10 +19,11 @@
   const gridRenderer = ref() as ComponentRef<typeof GridRenderer>
   const gridRendererProxy = new GridRendererProxy(gridRenderer)
   
+  const memoryState = new MemoryStateGist([rows, columns])
   const gridInputProxy = new MultiInputProxy(el => {
     let pos = gridRendererProxy.spanToPos(el)
     if (pos) return displayState.reader.getInputAcceptorAt(...pos)
-  }).on(new DoubleClickInput(), target => console.log(target.id))
+  }).on(new DoubleClickInput(), async target => {await memoryState.removeEntry(target.id); location.reload()})
   
   const gridUpdater = new GridUpdater(gridRendererProxy)
   const scatterModel = new ScatterModel(
@@ -33,7 +34,7 @@
     ), 
     displayState.reader
   )
-  const memoryState = new MemoryStateGist([rows, columns], [scatterModel.displayEntry])
+  memoryState.addListener(scatterModel.displayEntry)
 </script>
 
 <template>
