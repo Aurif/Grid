@@ -1,31 +1,32 @@
+import type Entity from "@/common/entity"
 import type Input from "./input"
 
 export default class InputAcceptor {
-    actions: {[input: string]: ((target: InputAcceptorSpawn) => void)[]} = {}
-    on(input: Input, action: (target: InputAcceptorSpawn) => void): this {
+    actions: {[input: string]: ((target: Entity) => void)[]} = {}
+    on(input: Input, action: (target: Entity) => void): this {
         let key = input.uid
         if (!this.actions[key]) this.actions[key] = []
         this.actions[key].push(action)
 
         return this
     }
-    trigger(input: Input, target: InputAcceptorSpawn) {
+    trigger(input: Input, target: Entity) {
         for(let action of (this.actions[input.uid] || []))
             action(target)
     }
-    spawn(id: string): InputAcceptorSpawn {
-        return new InputAcceptorSpawn(this, id)
+    spawn(owner: Entity): InputAcceptorSpawn {
+        return new InputAcceptorSpawn(this, owner)
     }
 }
 
 class InputAcceptorSpawn {
-    private owner: InputAcceptor
-    id: string
+    private parent: InputAcceptor
+    owner: Entity
 
-    constructor(owner: InputAcceptor, id: string) {
+    constructor(parent: InputAcceptor, owner: Entity) {
+        this.parent = parent
         this.owner = owner
-        this.id = id
     }
-    trigger(input: Input) { this.owner.trigger(input, this) }
+    trigger(input: Input) { this.parent.trigger(input, this.owner) }
 }
 export type { InputAcceptorSpawn }

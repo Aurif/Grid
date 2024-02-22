@@ -1,3 +1,4 @@
+import type Entity from "@/common/entity";
 import type Input from "./input";
 import type { InputAcceptorSpawn } from "./input-acceptor";
 import InputAcceptor from "./input-acceptor";
@@ -11,7 +12,7 @@ export default class MultiInputProxy {
         this.mapping = mapping
     }
 
-    on(input: Input, action: (target: InputAcceptorSpawn) => void): this {
+    on(input: Input, action: (target: Entity) => void): this {
         if(!this.inputUidCache.has(input.uid)) {
             input.addListener(el => this.mapping(el)?.trigger(input))
             this.inputUidCache.add(input.uid)

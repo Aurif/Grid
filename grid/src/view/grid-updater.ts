@@ -13,11 +13,13 @@ export default class GridUpdater {
         const span = this.proxy.posToChar(x, y);
         span.innerText = char;
     }
+
     @command
     enablePos(x: number, y: number) {
         const span = this.proxy.posToChar(x, y);
         span.classList.add('active');
     }
+    
     @command
     disablePos(x: number, y: number) {
         const span = this.proxy.posToChar(x, y);

@@ -12,25 +12,35 @@
   import type { ComponentRef } from './common/types';
   import DoubleClickInput from "./input/double-click";
   import MultiInputProxy from './input/multi-input-proxy';
+  import Entity from './common/entity';
 
   const { rows, columns } = determinePositioning()
   const displayState = new DisplayState(rows, columns)
 
   const gridRenderer = ref() as ComponentRef<typeof GridRenderer>
   const gridRendererProxy = new GridRendererProxy(gridRenderer)
+  const gridUpdater = new GridUpdater(gridRendererProxy)
   
   const memoryState = new MemoryStateGist([rows, columns])
   const gridInputProxy = new MultiInputProxy(el => {
     let pos = gridRendererProxy.spanToPos(el)
-    if (pos) return displayState.reader.getInputAcceptorAt(...pos)
-  }).on(new DoubleClickInput(), async target => {await memoryState.removeEntry(target.id); location.reload()})
+    if (!pos) return 
+    let owners = displayState.reader.getOwnersAt(...pos)
+    if (owners.length == 1) return owners[0].inputAcceptor
+  }).on(new DoubleClickInput(), async target => {
+    let otherLetters = displayState.reader.getOwnedBy(target)
+    for(let pos of otherLetters) {
+      displayState.removeAt(...pos, target)
+      if(displayState.reader.getOwnersAt(...pos).length == 0) gridUpdater.disablePos(...pos)
+    }
+    memoryState.removeEntry(target.uid)
+  })
   
-  const gridUpdater = new GridUpdater(gridRendererProxy)
   const scatterModel = new ScatterModel(
     Command.combine(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (x: number, y: number, value: string, owner: string) => displayState.setAt(x, y, value, gridInputProxy.acceptor.spawn(owner))
+      (x: number, y: number, value: string, owner: Entity) => displayState.setAt(x, y, value, owner.withInput(gridInputProxy.acceptor))
     ), 
     displayState.reader
   )
