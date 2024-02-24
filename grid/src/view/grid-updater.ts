@@ -7,22 +7,19 @@ export default class GridUpdater {
         this.proxy = proxy
     }
 
-    @command
-    setChar(x: number, y: number, char: string) {
+    setChar = command((x: number, y: number, char: string) => {
         if (char.length !== 1) throw new Error('char must be a single character');
         const span = this.proxy.posToChar(x, y);
         span.innerText = char;
-    }
+    })
 
-    @command
-    enablePos(x: number, y: number) {
+    enablePos = command((x: number, y: number) => {
         const span = this.proxy.posToChar(x, y);
         span.classList.add('active');
-    }
+    })
     
-    @command
-    disablePos(x: number, y: number) {
+    disablePos = command((x: number, y: number) => {
         const span = this.proxy.posToChar(x, y);
         span.classList.remove('active');
-    }
+    })
 }

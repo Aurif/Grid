@@ -18,8 +18,7 @@ export default class DisplayState {
         });
     }
 
-    @command
-    setAt(x: number, y: number, value: string, owner: Entity) {
+    setAt = command((x: number, y: number, value: string, owner: Entity) => {
         if (!this.state[`${x}:${y}`]) {
             this.state[`${x}:${y}`] = {value, owners: [owner]}
         } else if (this.state[`${x}:${y}`].value != value) {
@@ -30,15 +29,14 @@ export default class DisplayState {
 
         if(!this.ownerMapping[owner.uid]) this.ownerMapping[owner.uid] = []
         this.ownerMapping[owner.uid].push([x, y])
-    }
+    })
 
-    @command
-    removeAt(x: number, y: number, owner: Entity) {
+    removeAt = command((x: number, y: number, owner: Entity) => {
         let ownerIndex;
         if(!this.state[`${x}:${y}`] || (ownerIndex = this.state[`${x}:${y}`].owners.map(o => o.uid).indexOf(owner.uid)) === -1) throw Error(`Tried removing owner from non-owned position at ${x}:${y}`)
         if(this.state[`${x}:${y}`].owners.length == 1) {delete this.state[`${x}:${y}`]; return}
         this.state[`${x}:${y}`].owners.splice(ownerIndex, 1)
-    }
+    })
 
     get reader() {
         return new DisplayStateReader(this);

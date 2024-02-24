@@ -2,7 +2,6 @@ import type { Ref } from "vue";
 import MemoryState from "./memory-state";
 import { gistToken, gistId } from "@/secrets";
 import { Octokit } from "octokit";
-import { command } from "@/common/command";
 
 const octokit = new Octokit({ auth: gistToken });
 
@@ -10,6 +9,8 @@ export default class MemoryStateGist extends MemoryState {
     constructor(trigger: Ref | Ref[]) {
         super(trigger);
         this.loadFromRemote().then(() => { this.fullListenerBroadcast(); });
+        this.addEntry.addPostCall(this.pushToRemote.bind(this))
+        this.removeEntry.addPostCall(this.pushToRemote.bind(this))
     }
 
     private async loadFromRemote() {
@@ -39,17 +40,5 @@ export default class MemoryStateGist extends MemoryState {
                 }
             }
         })
-    }
-
-    @command
-    addEntry(entry: string): void {
-        super.addEntry(entry);
-        this.pushToRemote();
-    }
-
-    @command
-    async removeEntry(eid: string) {
-        super.removeEntry(eid);
-        await this.pushToRemote();
     }
 }
