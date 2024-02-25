@@ -13,6 +13,7 @@
   import DoubleClickInput from "./input/double-click";
   import MultiInputProxy from './input/multi-input-proxy';
   import Entity from './common/entity';
+  import { makeContext, blankContext, type ContextCall } from './common/context';
 
   const { rows, columns } = determinePositioning()
   const displayState = new DisplayState(rows, columns)
@@ -28,19 +29,20 @@
     let owners = displayState.reader.getOwnersAt(...pos)
     if (owners.length == 1) return owners[0].inputAcceptor
   }).on(new DoubleClickInput(), async target => {
+    let call = blankContext()
     let otherLetters = displayState.reader.getOwnedBy(target)
     for(let pos of otherLetters) {
-      displayState.removeAt.call(...pos, target)
-      if(displayState.reader.getOwnersAt(...pos).length == 0) gridUpdater.disablePos.call(...pos)
+      call(displayState.removeAt, ...pos, target)
+      if(displayState.reader.getOwnersAt(...pos).length == 0) call(gridUpdater.disablePos, ...pos)
     }
-    memoryState.removeEntry.call(target.uid)
+    call(memoryState.removeEntry, target.uid)
   })
   
   const scatterModel = new ScatterModel(
     Command.combine<[x: number, y: number, char: string, owner: Entity]>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (x: number, y: number, value: string, owner: Entity) => displayState.setAt.call(x, y, value, owner.withInput(gridInputProxy.acceptor))
+      (call: ContextCall, x: number, y: number, value: string, owner: Entity) => call(displayState.setAt, x, y, value, owner.withInput(gridInputProxy.acceptor))
     ), 
     displayState.reader
   )
@@ -49,7 +51,7 @@
 
 <template>
   <GridRenderer :rows="rows" :columns="columns" :bind="gridUpdater" ref="gridRenderer"/>
-  <InputRenderer :rows="rows" @onNewEntry="memoryState.addEntry.call"/>
+  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, $event)"/>
 </template>
 
 <style>

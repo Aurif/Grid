@@ -1,5 +1,6 @@
 import { command, enableCommandLogging } from '@/common/command';
 import type GridRendererProxy from './grid-renderer-proxy';
+import type { ContextCall } from '@/common/context';
 
 export default class GridUpdater {
     proxy: GridRendererProxy;
@@ -8,18 +9,18 @@ export default class GridUpdater {
         enableCommandLogging(this);
     }
 
-    setChar = command((x: number, y: number, char: string) => {
+    setChar = command((_call: ContextCall, x: number, y: number, char: string) => {
         if (char.length !== 1) throw new Error('char must be a single character');
         const span = this.proxy.posToChar(x, y);
         span.innerText = char;
     })
 
-    enablePos = command((x: number, y: number) => {
+    enablePos = command((_call: ContextCall, x: number, y: number) => {
         const span = this.proxy.posToChar(x, y);
         span.classList.add('active');
     })
     
-    disablePos = command((x: number, y: number) => {
+    disablePos = command((_call: ContextCall, x: number, y: number) => {
         const span = this.proxy.posToChar(x, y);
         span.classList.remove('active');
     })

@@ -1,6 +1,7 @@
 import { Command, command, enableCommandLogging } from '@/common/command';
 import type { DisplayStateReader } from './display-state';
 import Entity from '@/common/entity';
+import type { ContextCall } from '@/common/context';
 
 export default class ScatterModel {
     renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>;
@@ -45,9 +46,9 @@ export default class ScatterModel {
         return posToKey;
     }
 
-    displayEntry = command((entry: string, entryId: string) => {
+    displayEntry = command((call: ContextCall, entry: string, entryId: string) => {
         let pos = this.findPositionForEntry(entry);
         if (!pos) throw new Error('No position found');
-        for(let [i, char] of entry.split('').entries()) this.renderCommand.call(...pos(i), char, new Entity(entryId));
+        for(let [i, char] of entry.split('').entries()) call(this.renderCommand, ...pos(i), char, new Entity(entryId));
     })
 }

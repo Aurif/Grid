@@ -1,13 +1,15 @@
-export function command<A extends any[]>(func: (...args: A)=>void): Command<A> {
+import type { ContextCall } from "./context"
+
+export function command<A extends any[]>(func: (call: ContextCall, ...args: A)=>void): Command<A> {
     return new Command([func])
 }
 
-export type CommandLike<A extends any[]> = Command<A> | ((...args: A)=>void)
+export type CommandLike<A extends any[]> = Command<A> | ((call: ContextCall, ...args: A)=>void)
 
 export class Command<A extends any[]>  {
     private name?: string
-    private actions: ((...args: A)=>void)[]
-    constructor(actions: ((...args: A)=>void)[]) {
+    private actions: ((call: ContextCall, ...args: A)=>void)[]
+    constructor(actions: ((call: ContextCall, ...args: A)=>void)[]) {
         this.actions = actions
     }
 
@@ -16,25 +18,23 @@ export class Command<A extends any[]>  {
         this.name = name
     }
 
-    public get call(): ((...args: A) => void) {
-        return (...args: A) => {
-            if (this.name) console.debug(`Running ${this.name} with`, ...args)
-            for(let action of this.actions) {
-                action(...args)
-            }
+    call(call: ContextCall, ...args: A) {
+        if (this.name) console.debug(`Running ${this.name} with`, ...args)
+        for(let action of this.actions) {
+            action(call, ...args)
         }
     }
 
 
-    public addPostCall<F extends ((...args: A)=>void)>(func: F) {
+    public addPostCall<F extends ((call: ContextCall, ...args: A)=>void)>(func: F) {
         this.actions.push(func)
     }
 
 
     static combine<A extends any[]>(...commands: CommandLike<A>[]): Command<A> {
-        let funcs: ((...args: A)=>void)[] = []
+        let funcs: ((call: ContextCall, ...args: A)=>void)[] = []
         for(let command of commands) {
-            if (command instanceof Command) funcs.push(command.call)
+            if (command instanceof Command) funcs.push((call: ContextCall, ...args: A)=>call(command as Command<A>, ...args))
             else funcs.push(command)
         }
         return new Command(funcs)

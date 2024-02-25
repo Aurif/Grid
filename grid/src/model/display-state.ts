@@ -1,4 +1,5 @@
 import { command, enableCommandLogging } from "@/common/command";
+import type { ContextCall } from "@/common/context";
 import type Entity from "@/common/entity";
 import type { Ref } from "vue";
 import { watch } from 'vue'
@@ -19,7 +20,7 @@ export default class DisplayState {
         enableCommandLogging(this);
     }
 
-    setAt = command((x: number, y: number, value: string, owner: Entity) => {
+    setAt = command((_call: ContextCall, x: number, y: number, value: string, owner: Entity) => {
         if (!this.state[`${x}:${y}`]) {
             this.state[`${x}:${y}`] = {value, owners: [owner]}
         } else if (this.state[`${x}:${y}`].value != value) {
@@ -32,7 +33,7 @@ export default class DisplayState {
         this.ownerMapping[owner.uid].push([x, y])
     })
 
-    removeAt = command((x: number, y: number, owner: Entity) => {
+    removeAt = command((_call: ContextCall, x: number, y: number, owner: Entity) => {
         let ownerIndex;
         if(!this.state[`${x}:${y}`] || (ownerIndex = this.state[`${x}:${y}`].owners.map(o => o.uid).indexOf(owner.uid)) === -1) throw Error(`Tried removing owner from non-owned position at ${x}:${y}`)
         if(this.state[`${x}:${y}`].owners.length == 1) {delete this.state[`${x}:${y}`]; return}
