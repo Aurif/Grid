@@ -1,4 +1,4 @@
-import { Command, command } from "@/common/command";
+import { Command, command, enableCommandLogging } from "@/common/command";
 import { watch, type Ref } from "vue";
 
 export default class MemoryState {
@@ -7,6 +7,7 @@ export default class MemoryState {
     
     constructor(trigger: Ref | Ref[]) {
         watch(trigger, () => this.fullListenerBroadcast(), { flush: 'post' });
+        enableCommandLogging(this);
     }
 
     addListener(listener: Command<[entry: string, owner: string]>) {

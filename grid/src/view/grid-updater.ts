@@ -1,10 +1,11 @@
-import { command } from '@/common/command';
+import { command, enableCommandLogging } from '@/common/command';
 import type GridRendererProxy from './grid-renderer-proxy';
 
 export default class GridUpdater {
     proxy: GridRendererProxy;
     constructor(proxy: GridRendererProxy) {
         this.proxy = proxy
+        enableCommandLogging(this);
     }
 
     setChar = command((x: number, y: number, char: string) => {

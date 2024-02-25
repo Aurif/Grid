@@ -1,4 +1,4 @@
-import { Command, command } from '@/common/command';
+import { Command, command, enableCommandLogging } from '@/common/command';
 import type { DisplayStateReader } from './display-state';
 import Entity from '@/common/entity';
 
@@ -9,6 +9,7 @@ export default class ScatterModel {
     constructor(renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>, state: DisplayStateReader) {
         this.renderCommand = renderCommand;
         this.state = state;
+        enableCommandLogging(this);
     }
 
     findPositionForEntry(entry: string): ((offset: number, suboffset?: number) => [number, number]) | undefined {

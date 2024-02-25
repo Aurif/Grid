@@ -1,4 +1,4 @@
-import { command } from "@/common/command";
+import { command, enableCommandLogging } from "@/common/command";
 import type Entity from "@/common/entity";
 import type { Ref } from "vue";
 import { watch } from 'vue'
@@ -16,6 +16,7 @@ export default class DisplayState {
             this.state = {};
             this.ownerMapping = {};
         });
+        enableCommandLogging(this);
     }
 
     setAt = command((x: number, y: number, value: string, owner: Entity) => {
@@ -41,6 +42,7 @@ export default class DisplayState {
     get reader() {
         return new DisplayStateReader(this);
     }
+
 }
 
 export class DisplayStateReader {
