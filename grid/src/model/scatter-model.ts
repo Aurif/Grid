@@ -4,8 +4,8 @@ import Entity from '@/common/entity';
 import type { ContextCall } from '@/common/context';
 
 export default class ScatterModel {
-    renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>;
-    state: DisplayStateReader;
+    private renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>;
+    private state: DisplayStateReader;
 
     constructor(renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>, state: DisplayStateReader) {
         this.renderCommand = renderCommand;
@@ -19,8 +19,8 @@ export default class ScatterModel {
 
         let generatePos = (): void => {
             horizontal = Math.random() > 0.5;
-            mi = Math.floor(1 + Math.random() * ((horizontal ? my : mx) - entry.length - 1));
-            si = Math.floor(1 + Math.random() * ((horizontal ? mx : my) - 2));
+            mi = Math.floor(1 + Math.random() * ((horizontal ? mx : my) - entry.length - 1));
+            si = Math.floor(1 + Math.random() * ((horizontal ? my : mx) - 2));
         }
         let posToKey = (offset: number, suboffset: number=0): [number, number] => {
             return horizontal ? [mi + offset*1, si + suboffset*1] : [si + suboffset*1, mi + offset*1];

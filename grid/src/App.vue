@@ -12,8 +12,12 @@
   import type { ComponentRef } from './common/types';
   import DoubleClickInput from "./input/double-click";
   import MultiInputProxy from './input/multi-input-proxy';
-  import Entity from './common/entity';
+  import Entity, { anonymousEntity } from './common/entity';
   import { makeContext, blankContext, type ContextCall } from './common/context';
+  import HeaderModel from './model/header-model';
+
+
+
 
   const { rows, columns } = determinePositioning()
   const displayState = new DisplayState(rows, columns)
@@ -30,13 +34,16 @@
     if (owners.length == 1) return owners[0].inputAcceptor
   }).on(new DoubleClickInput(), async target => {
     let call = blankContext()
+    hideFromGrid(call, target)
+    call(memoryState.removeEntry, target.uid)
+  })
+  function hideFromGrid(call: ContextCall, target: Entity) {
     let otherLetters = displayState.reader.getOwnedBy(target)
     for(let pos of otherLetters) {
       call(displayState.removeAt, ...pos, target)
       if(displayState.reader.getOwnersAt(...pos).length == 0) call(gridUpdater.disablePos, ...pos)
     }
-    call(memoryState.removeEntry, target.uid)
-  })
+  }
   
   const scatterModel = new ScatterModel(
     Command.combine<[x: number, y: number, char: string, owner: Entity]>(
@@ -47,11 +54,28 @@
     displayState.reader
   )
   memoryState.addListener(scatterModel.displayEntry)
+
+
+
+  const headerEntity = anonymousEntity()
+  const headerModel = new HeaderModel(
+    Command.combine<[x: number, y: number, char: string]>(
+      gridUpdater.setChar, 
+      gridUpdater.enablePos, 
+      (call: ContextCall, x: number, y: number, value: string) => call(displayState.setAt, x, y, value, headerEntity)
+    ), 
+    displayState.reader
+  )
+  let cycleHeader = Command.combine(
+    (call: ContextCall, value: string) => hideFromGrid(call, headerEntity),
+    headerModel.setContent,
+  )
 </script>
 
 <template>
   <GridRenderer :rows="rows" :columns="columns" :bind="gridUpdater" ref="gridRenderer"/>
-  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, $event)"/>
+  <!-- <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, $event)"/> -->
+  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(cycleHeader, $event)"/>
 </template>
 
 <style>
