@@ -54,7 +54,7 @@
     ), 
     displayState.reader
   )
-  memoryState.listeners.add(scatterModel.displayEntry)
+  memoryState.listeners.add((call: ContextCall, {value}, eid) => call(scatterModel.displayEntry, value, eid))
 
 
 
@@ -88,7 +88,7 @@
 
 <template>
   <GridRenderer :rows="rows" :columns="columns" :bind="gridUpdater" ref="gridRenderer"/>
-  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, $event)"/>
+  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, {value: $event})"/>
 </template>
 
 <style>

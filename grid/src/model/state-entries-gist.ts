@@ -1,5 +1,5 @@
 import type { Ref } from "vue";
-import StateEntries from "./state-entries";
+import StateEntries, { type Entry } from "./state-entries";
 import { gistToken, gistId } from "@/secrets";
 import { Octokit } from "octokit";
 
@@ -19,7 +19,7 @@ export default class StateEntriesGist extends StateEntries {
             headers: { 'X-GitHub-Api-Version': '2022-11-28' }
         })
 
-        let remoteData: {[id: string]: string} = {};
+        let remoteData: {[id: string]: Entry} = {};
         try {
             // @ts-ignore
             remoteData = JSON.parse(remoteDataRaw["data"]["files"]["grid.json"]["content"])

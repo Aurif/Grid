@@ -3,9 +3,10 @@ import { blankContext, type ContextCall } from "@/common/context";
 import Listeners from "@/common/listeners";
 import { watch, type Ref } from "vue";
 
+export type Entry = {value: string, [key: string]: any}
 export default class StateEntries {
-    entries: {[id: string]: string} = {};
-    readonly listeners = new Listeners<[entry: string, owner: string]>()
+    entries: {[id: string]: Entry} = {};
+    readonly listeners = new Listeners<[entry: Entry, owner: string]>()
     
     constructor(trigger: Ref | Ref[]) {
         watch(trigger, () => this.fullListenerBroadcast(), { flush: 'post' });
@@ -19,7 +20,7 @@ export default class StateEntries {
         }
     }
 
-    addEntry = command((call: ContextCall, entry: string) => {
+    addEntry = command((call: ContextCall, entry: Entry) => {
         const eid = ''+Date.now()
         this.entries[eid] = entry;
         this.listeners.emit(call, entry, eid)
