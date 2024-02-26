@@ -18,9 +18,9 @@ export class Command<A extends any[]>  {
         this.name = name
     }
 
-    call(call: ContextCall, ...args: A) {
+    private call(call: ContextCall, ...args: A) {
         if (this.name) console.debug(`Running ${this.name} with`, ...args)
-        for(let action of this.actions) {
+        for(const action of this.actions) {
             action(call, ...args)
         }
     }
@@ -32,8 +32,8 @@ export class Command<A extends any[]>  {
 
 
     static combine<A extends any[]>(...commands: CommandLike<A>[]): Command<A> {
-        let funcs: ((call: ContextCall, ...args: A)=>void)[] = []
-        for(let command of commands) {
+        const funcs: ((call: ContextCall, ...args: A)=>void)[] = []
+        for(const command of commands) {
             if (command instanceof Command) funcs.push((call: ContextCall, ...args: A)=>call(command as Command<A>, ...args))
             else funcs.push(command)
         }
@@ -42,7 +42,7 @@ export class Command<A extends any[]>  {
 }
 
 export function enableCommandLogging(target: any) {
-    for(let key in target) {
+    for(const key in target) {
         if (target[key] instanceof Command) target[key].name = `${target.constructor.name}.${key}`
     }
 }

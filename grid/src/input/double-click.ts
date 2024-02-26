@@ -1,11 +1,14 @@
 import { onMounted, onUnmounted } from 'vue'
 import Input from './input'
+import singleton from '@/common/singleton'
 
-export default class DoubleClickInput extends Input {
+
+class DoubleClickInput extends Input {
     constructor() {
         super()
-        let onDblClick = (event: MouseEvent) => this.onTrigger(event.target as HTMLElement)
+        const onDblClick = (event: MouseEvent) => this.onTrigger(event.target as HTMLElement)
         onMounted(() => window.addEventListener('dblclick', onDblClick))
         onUnmounted(() => window.removeEventListener('dblclick', onDblClick))
     }
 }
+export default singleton(DoubleClickInput)

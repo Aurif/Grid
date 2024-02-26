@@ -13,11 +13,10 @@
   import DoubleClickInput from "./input/double-click";
   import MultiInputProxy from './input/multi-input-proxy';
   import Entity, { anonymousEntity } from './common/entity';
-  import { makeContext, blankContext, type ContextCall } from './common/context';
+  import { makeContext, blankContext, type ContextCall, callOnInit } from './common/context';
   import ModelHeader from './model/model-header';
-
-
-
+  import { StateCyclic } from './model/state-cyclic';
+  import ClickInput from "./input/click";
 
   const { rows, columns } = determinePositioning()
   const displayState = new StateDisplay(rows, columns)
@@ -32,7 +31,9 @@
     if (!pos) return 
     let owners = displayState.reader.getOwnersAt(...pos)
     if (owners.length == 1) return owners[0].inputAcceptor
-  }).on(new DoubleClickInput(), async target => {
+  })
+  const scatterInputProxy = gridInputProxy.subset()
+  .on(DoubleClickInput(), target => {
     let call = blankContext()
     hideFromGrid(call, target)
     call(memoryState.removeEntry, target.uid)
@@ -49,15 +50,26 @@
     Command.combine<[x: number, y: number, char: string, owner: Entity]>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (call: ContextCall, x: number, y: number, value: string, owner: Entity) => call(displayState.setAt, x, y, value, owner.withInput(gridInputProxy.acceptor))
+      (call: ContextCall, x: number, y: number, value: string, owner: Entity) => call(displayState.setAt, x, y, value, owner.withInput(scatterInputProxy.acceptor))
     ), 
     displayState.reader
   )
-  memoryState.addListener(scatterModel.displayEntry)
+  memoryState.listeners.add(scatterModel.displayEntry)
 
 
 
+  const cyclicState = new StateCyclic([
+    {label: "TODAY"},
+    {label: "THIS WEEK"},
+    {label: "THIS MONTH"},
+    {label: "NEXT 4 MONTHS"},
+  ])
   const headerEntity = anonymousEntity()
+    .withInput(
+      gridInputProxy.subset()
+        .on(ClickInput(), () => {blankContext()(cyclicState.cycleNext)})
+        .acceptor
+    )
   const headerModel = new ModelHeader(
     Command.combine<[x: number, y: number, char: string]>(
       gridUpdater.setChar, 
@@ -66,16 +78,16 @@
     ), 
     displayState.reader
   )
-  let cycleHeader = Command.combine<[content: string]>(
+  cyclicState.listeners.add(Command.combine<[value: { label: string; }]>(
     (call: ContextCall) => hideFromGrid(call, headerEntity),
-    headerModel.setContent,
-  )
+    (call: ContextCall, {label}) =>  call(headerModel.setContent, label),
+  ))
+  callOnInit(headerModel.setContent, cyclicState.reader.getCurrent("label"))
 </script>
 
 <template>
   <GridRenderer :rows="rows" :columns="columns" :bind="gridUpdater" ref="gridRenderer"/>
-  <!-- <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, $event)"/> -->
-  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(cycleHeader, $event)"/>
+  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, $event)"/>
 </template>
 
 <style>
