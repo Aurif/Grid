@@ -59,10 +59,10 @@
 
 
   const cyclicState = new StateCyclic([
-    {label: "TODAY"},
+    {label: "TODAY", color: '#f98f71'},
     {label: "THIS WEEK"},
-    {label: "THIS MONTH"},
-    {label: "NEXT 4 MONTHS"},
+    {label: "THIS MONTH", color: '#9673a4'},
+    {label: "NEXT 4 MONTHS", color: '#4a5c78'},
   ])
   const headerEntity = anonymousEntity()
     .withInput(
@@ -74,6 +74,7 @@
     Command.combine<[x: number, y: number, char: string]>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
+      (call: ContextCall, x: number, y: number) => call(gridUpdater.setColor, x, y, cyclicState.reader.getCurrent('color')),
       (call: ContextCall, x: number, y: number, value: string) => call(displayState.setAt, x, y, value, headerEntity)
     ), 
     displayState.reader

@@ -31,7 +31,7 @@
 
 <template>
     <div class="parent">
-        <div class="row" v-for="y in rows*1">
+        <div class="row" v-for="y in rows*1" :key="y">
             <span v-for="x in columns*1" :key="stateId+':'+(x-1)+':'+(y-1)" 
                   :ref="(el) => chars[(x-1)+':'+(y-1)]=(el as HTMLSpanElement)"
                   :container-uid="uid" :pos-x="x-1" :pos-y="y-1"
@@ -55,6 +55,7 @@
         margin: 0 8px;
     }
     span {
+        --color-active: #eee683;
         color: #ffffff;
         font-size: 30px;
         font-family: 'Roboto Mono', monospace;
@@ -66,7 +67,7 @@
     }
     span.active {
         opacity: 1;
-        color: #eee683;
-        text-shadow: 0 0 4px #eee683;
+        color: var(--color-active);
+        text-shadow: 0 0 4px var(--color-active);
     }
 </style>

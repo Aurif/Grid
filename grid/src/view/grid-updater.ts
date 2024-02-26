@@ -15,6 +15,12 @@ export default class GridUpdater {
         span.innerText = char;
     })
 
+    setColor = command((_call: ContextCall, x: number, y: number, color?: string) => {
+        const span = this.proxy.posToChar(x, y);
+        if(!color) span.style.removeProperty('--color-active');
+        else span.style.setProperty('--color-active', color);
+    })
+
     enablePos = command((_call: ContextCall, x: number, y: number) => {
         const span = this.proxy.posToChar(x, y);
         span.classList.add('active');
@@ -23,5 +29,6 @@ export default class GridUpdater {
     disablePos = command((_call: ContextCall, x: number, y: number) => {
         const span = this.proxy.posToChar(x, y);
         span.classList.remove('active');
+        span.style.removeProperty('--color-active');
     })
 }
