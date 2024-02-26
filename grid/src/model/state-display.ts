@@ -4,7 +4,7 @@ import type Entity from "@/common/entity";
 import type { Ref } from "vue";
 import { watch } from 'vue'
 
-export default class DisplayState {
+export default class StateDisplay {
     state: {[key: string]: {value: string, owners: Entity[]}} = {};
     ownerMapping: {[key: string]: [number, number][]} = {};
     rows: Ref<number>;
@@ -46,15 +46,15 @@ export default class DisplayState {
     })
 
     get reader() {
-        return new DisplayStateReader(this);
+        return new StateDisplayReader(this);
     }
 
 }
 
-export class DisplayStateReader {
-    private state: DisplayState;
+export class StateDisplayReader {
+    private state: StateDisplay;
 
-    constructor(state: DisplayState) {
+    constructor(state: StateDisplay) {
         this.state = state;
     }
 

@@ -2,7 +2,7 @@ import { Command, command, enableCommandLogging } from "@/common/command";
 import { blankContext, type ContextCall } from "@/common/context";
 import { watch, type Ref } from "vue";
 
-export default class MemoryState {
+export default class StateEntries {
     entries: {[id: string]: string} = {};
     listeners: Command<[entry: string, owner: string]>[] = [];
     
@@ -16,18 +16,18 @@ export default class MemoryState {
     }
 
     fullListenerBroadcast() {
-        let call = blankContext()
-        for (let eid in this.entries) {
-            for (let listener of this.listeners) {
+        const call = blankContext()
+        for (const eid in this.entries) {
+            for (const listener of this.listeners) {
                 call(listener, this.entries[eid], eid);
             }
         }
     }
 
     addEntry = command((call: ContextCall, entry: string) => {
-        let eid = ''+Date.now()
+        const eid = ''+Date.now()
         this.entries[eid] = entry;
-        for (let listener of this.listeners) {
+        for (const listener of this.listeners) {
             call(listener, entry, eid);
         }
     })

@@ -1,12 +1,12 @@
 <script setup lang="ts">
   import { determinePositioning } from './input/positioning'
-  import DisplayState from './model/display-state'
+  import StateDisplay from './model/state-display'
   import GridRenderer from './view/GridRenderer.vue'
   import InputRenderer from './view/InputRenderer.vue'
   import GridUpdater from './view/grid-updater';
   import { Command } from './common/command'
-  import ScatterModel from './model/scatter-model'
-  import MemoryStateGist from './model/memory-state-gist';
+  import ModelScatter from './model/model-scatter'
+  import StateEntriesGist from './model/state-entries-gist';
   import { ref } from 'vue';
   import GridRendererProxy from "./view/grid-renderer-proxy"
   import type { ComponentRef } from './common/types';
@@ -14,19 +14,19 @@
   import MultiInputProxy from './input/multi-input-proxy';
   import Entity, { anonymousEntity } from './common/entity';
   import { makeContext, blankContext, type ContextCall } from './common/context';
-  import HeaderModel from './model/header-model';
+  import ModelHeader from './model/model-header';
 
 
 
 
   const { rows, columns } = determinePositioning()
-  const displayState = new DisplayState(rows, columns)
+  const displayState = new StateDisplay(rows, columns)
 
   const gridRenderer = ref() as ComponentRef<typeof GridRenderer>
   const gridRendererProxy = new GridRendererProxy(gridRenderer)
   const gridUpdater = new GridUpdater(gridRendererProxy)
   
-  const memoryState = new MemoryStateGist([rows, columns])
+  const memoryState = new StateEntriesGist([rows, columns])
   const gridInputProxy = new MultiInputProxy(el => {
     let pos = gridRendererProxy.spanToPos(el)
     if (!pos) return 
@@ -45,7 +45,7 @@
     }
   }
   
-  const scatterModel = new ScatterModel(
+  const scatterModel = new ModelScatter(
     Command.combine<[x: number, y: number, char: string, owner: Entity]>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
@@ -58,7 +58,7 @@
 
 
   const headerEntity = anonymousEntity()
-  const headerModel = new HeaderModel(
+  const headerModel = new ModelHeader(
     Command.combine<[x: number, y: number, char: string]>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
@@ -66,8 +66,8 @@
     ), 
     displayState.reader
   )
-  let cycleHeader = Command.combine(
-    (call: ContextCall, value: string) => hideFromGrid(call, headerEntity),
+  let cycleHeader = Command.combine<[content: string]>(
+    (call: ContextCall) => hideFromGrid(call, headerEntity),
     headerModel.setContent,
   )
 </script>

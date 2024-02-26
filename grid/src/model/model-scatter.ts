@@ -1,13 +1,13 @@
 import { Command, command, enableCommandLogging } from '@/common/command';
-import type { DisplayStateReader } from './display-state';
+import type { StateDisplayReader } from './state-display';
 import Entity from '@/common/entity';
 import type { ContextCall } from '@/common/context';
 
-export default class ScatterModel {
+export default class ModelScatter {
     private renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>;
-    private state: DisplayStateReader;
+    private state: StateDisplayReader;
 
-    constructor(renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>, state: DisplayStateReader) {
+    constructor(renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>, state: StateDisplayReader) {
         this.renderCommand = renderCommand;
         this.state = state;
         enableCommandLogging(this);
@@ -15,26 +15,26 @@ export default class ScatterModel {
 
     findPositionForEntry(entry: string): ((offset: number, suboffset?: number) => [number, number]) | undefined {
         let horizontal: boolean, mi: number, si: number // Main and secondary axis
-        let mx = this.state.columns, my = this.state.rows;
+        const mx = this.state.columns, my = this.state.rows;
 
-        let generatePos = (): void => {
+        const generatePos = (): void => {
             horizontal = Math.random() > 0.5;
             mi = Math.floor(1 + Math.random() * ((horizontal ? mx : my) - entry.length - 1));
             si = Math.floor(1 + Math.random() * ((horizontal ? my : mx) - 2));
         }
-        let posToKey = (offset: number, suboffset: number=0): [number, number] => {
+        const posToKey = (offset: number, suboffset: number=0): [number, number] => {
             return horizontal ? [mi + offset*1, si + suboffset*1] : [si + suboffset*1, mi + offset*1];
         }
-        let get = (offset: number, suboffset: number=0): string | undefined => {
+        const get = (offset: number, suboffset: number=0): string | undefined => {
             return this.state.getAt(...posToKey(offset, suboffset));
         }
 
-        let isPosValid = () => {
+        const isPosValid = () => {
             if (get(-1) || get(entry.length)) return false;
             let overlap = true;
             for (let i = 0; i < entry.length; i++) {
                 if (get(i) && get(i)![0] != entry[i]) return false;
-                if (!get(i)) for (let j of [-1, 1]) if (get(i, j)) return false;
+                if (!get(i)) for (const j of [-1, 1]) if (get(i, j)) return false;
                 if (!get(i)) overlap = false;
             }
             if (overlap) return false;
@@ -47,8 +47,8 @@ export default class ScatterModel {
     }
 
     displayEntry = command((call: ContextCall, entry: string, entryId: string) => {
-        let pos = this.findPositionForEntry(entry);
+        const pos = this.findPositionForEntry(entry);
         if (!pos) throw new Error('No position found');
-        for(let [i, char] of entry.split('').entries()) call(this.renderCommand, ...pos(i), char, new Entity(entryId));
+        for(const [i, char] of entry.split('').entries()) call(this.renderCommand, ...pos(i), char, new Entity(entryId));
     })
 }

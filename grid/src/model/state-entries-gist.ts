@@ -1,11 +1,11 @@
 import type { Ref } from "vue";
-import MemoryState from "./memory-state";
+import StateEntries from "./state-entries";
 import { gistToken, gistId } from "@/secrets";
 import { Octokit } from "octokit";
 
 const octokit = new Octokit({ auth: gistToken });
 
-export default class MemoryStateGist extends MemoryState {
+export default class StateEntriesGist extends StateEntries {
     constructor(trigger: Ref | Ref[]) {
         super(trigger);
         this.loadFromRemote().then(() => { this.fullListenerBroadcast(); });
@@ -14,7 +14,7 @@ export default class MemoryStateGist extends MemoryState {
     }
 
     private async loadFromRemote() {
-        let remoteDataRaw = await octokit.request(`GET /gists/{gist_id}`, {
+        const remoteDataRaw = await octokit.request(`GET /gists/{gist_id}`, {
             gist_id: gistId,
             headers: { 'X-GitHub-Api-Version': '2022-11-28' }
         })
