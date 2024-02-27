@@ -5,7 +5,7 @@ import type { Ref } from "vue";
 import { watch } from 'vue'
 
 export default class StateDisplay {
-    state: {[key: string]: {value: string, owners: Entity[]}} = {};
+    state: {[key: string]: {char: string, owners: Entity[]}} = {};
     ownerMapping: {[key: string]: [number, number][]} = {};
     rows: Ref<number>;
     columns: Ref<number>;
@@ -20,11 +20,11 @@ export default class StateDisplay {
         enableCommandLogging(this);
     }
 
-    setAt = command((_call: ContextCall, x: number, y: number, value: string, owner: Entity) => {
+    setAt = command((_call: ContextCall, {x, y, char, owner}: {x: number, y: number, char: string, owner: Entity}) => {
         if (!this.state[`${x}:${y}`]) {
-            this.state[`${x}:${y}`] = {value, owners: [owner]}
-        } else if (this.state[`${x}:${y}`].value != value) {
-            throw Error(`Tried overwrite display state with conflicting value at ${x}:${y} (${this.state[`${x}:${y}`].value}->${value})`)
+            this.state[`${x}:${y}`] = {char, owners: [owner]}
+        } else if (this.state[`${x}:${y}`].char != char) {
+            throw Error(`Tried overwrite display state with conflicting char at ${x}:${y} (${this.state[`${x}:${y}`].char}->${char})`)
         } else {
             this.state[`${x}:${y}`].owners.push(owner)
         }
@@ -33,7 +33,7 @@ export default class StateDisplay {
         this.ownerMapping[owner.uid].push([x, y])
     })
 
-    removeAt = command((_call: ContextCall, x: number, y: number, owner: Entity) => {
+    removeAt = command((_call: ContextCall, {x, y, owner}: {x: number, y: number, owner: Entity}) => {
         let ownerIndex;
         if(!this.state[`${x}:${y}`] || (ownerIndex = this.state[`${x}:${y}`].owners.map(o => o.uid).indexOf(owner.uid)) === -1) throw Error(`Tried removing owner from non-owned position at ${x}:${y}`)
         if(this.state[`${x}:${y}`].owners.length == 1) {delete this.state[`${x}:${y}`]}
@@ -59,15 +59,15 @@ export class StateDisplayReader {
     }
 
     getAt(x: number, y: number): string | undefined {
-        return this.state.state[`${x}:${y}`]?.value;
+        return this.state.state[`${x}:${y}`]?.char;
     }
 
     getOwnersAt(x: number, y: number): Entity[] {
         return [...(this.state.state[`${x}:${y}`]?.owners || [])];
     }
 
-    getOwnedBy(owner: Entity): [number, number][] {
-        return [...(this.state.ownerMapping[owner.uid] || [])];
+    getOwnedBy(owner: Entity): {x: number, y: number}[] {
+        return [...(this.state.ownerMapping[owner.uid].map(([x, y]) => ({x, y})) || [])];
     }
 
     watchResize(handler: (()=>void)) {

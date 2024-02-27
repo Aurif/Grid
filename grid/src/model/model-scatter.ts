@@ -4,16 +4,16 @@ import Entity from '@/common/entity';
 import type { ContextCall } from '@/common/context';
 
 export default class ModelScatter {
-    private renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>;
+    private renderCommand: Command<{x: number, y: number, char: string, owner: Entity}>;
     private state: StateDisplayReader;
 
-    constructor(renderCommand: Command<[x: number, y: number, char: string, owner: Entity]>, state: StateDisplayReader) {
+    constructor(renderCommand: Command<{x: number, y: number, char: string, owner: Entity}>, state: StateDisplayReader) {
         this.renderCommand = renderCommand;
         this.state = state;
         enableCommandLogging(this);
     }
 
-    findPositionForEntry(entry: string): ((offset: number, suboffset?: number) => [number, number]) | undefined {
+    findPositionForEntry(entry: string): ((offset: number, suboffset?: number) => {x: number, y: number}) | undefined {
         let horizontal: boolean, mi: number, si: number // Main and secondary axis
         const mx = this.state.columns, my = this.state.rows;
 
@@ -22,11 +22,12 @@ export default class ModelScatter {
             mi = Math.floor(1 + Math.random() * ((horizontal ? mx : my) - entry.length - 1));
             si = Math.floor(1 + Math.random() * ((horizontal ? my : mx) - 2));
         }
-        const posToKey = (offset: number, suboffset: number=0): [number, number] => {
-            return horizontal ? [mi + offset*1, si + suboffset*1] : [si + suboffset*1, mi + offset*1];
+        const posToKey = (offset: number, suboffset: number=0): {x: number, y: number} => {
+            return horizontal ? {x: mi + offset*1, y: si + suboffset*1} : {x: si + suboffset*1, y: mi + offset*1};
         }
         const get = (offset: number, suboffset: number=0): string | undefined => {
-            return this.state.getAt(...posToKey(offset, suboffset));
+            const position = posToKey(offset, suboffset)
+            return this.state.getAt(position.x, position.y);
         }
 
         const isPosValid = () => {
@@ -46,9 +47,9 @@ export default class ModelScatter {
         return posToKey;
     }
 
-    displayEntry = command((call: ContextCall, entry: string, entryId: string) => {
+    displayEntry = command((call: ContextCall, {entry, eid}: {entry: string, eid: string}) => {
         const pos = this.findPositionForEntry(entry);
         if (!pos) throw new Error('No position found');
-        for(const [i, char] of entry.split('').entries()) call(this.renderCommand, ...pos(i), char, new Entity(entryId));
+        for(const [i, char] of entry.split('').entries()) call(this.renderCommand, {...pos(i), char, owner: new Entity(eid)});
     })
 }

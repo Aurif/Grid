@@ -5,7 +5,7 @@ import Listeners from "@/common/listeners";
 export class StateCyclic<T extends {}> {
     private values: T[];
     private index: number = 0;
-    readonly listeners = new Listeners<[value: T]>();
+    readonly listeners = new Listeners<{value: T}>();
 
     constructor(values: T[]) {
         this.values = values
@@ -14,7 +14,7 @@ export class StateCyclic<T extends {}> {
 
     cycleNext = command((call: ContextCall) => {
         this.index = (this.index+1)%this.values.length
-        this.listeners.emit(call, {...this.values[this.index]})
+        this.listeners.emit(call, {value: {...this.values[this.index]}})
     })
 
     get reader() {

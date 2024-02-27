@@ -1,9 +1,9 @@
-import type { Command } from "./command"
+import type { Command, CommandArguments } from "./command"
 
-type Modifier<A extends any[]> = (command: Command<A>)=>Command<A>
+type Modifier<A extends CommandArguments> = (command: Command<A>)=>Command<A>
 export class ContextClass<C> {
     private modifiers: {[key: string]: [Modifier<any>, (value: C)=>boolean][]} = {}
-    registerModifier<A extends any[]>(command: Command<A>, condition: (value: C)=>boolean, modifier: Modifier<A>) {
+    registerModifier<A extends CommandArguments>(command: Command<A>, condition: (value: C)=>boolean, modifier: Modifier<A>) {
         if (!this.modifiers[command.uid]) this.modifiers[command.uid] = []
         this.modifiers[command.uid].push([modifier, condition])
     }
@@ -33,7 +33,7 @@ class Context<C> {
         this.value = value
     }
 
-    private getModified<A extends any[]>(command: Command<A>): Command<A> {
+    private getModified<A extends CommandArguments>(command: Command<A>): Command<A> {
         const commandUid = command.uid
         let currentCommand = command
         for (const modifier of (this.activeModifiers[commandUid] || [])) {
@@ -43,8 +43,8 @@ class Context<C> {
         return currentCommand
     }
 
-    call<A extends any[]>(command: Command<A>, ...args: A) {
-        this.getModified(command)['call'](this.call.bind(this) as ContextCall, ...args)
+    public call<A extends CommandArguments>(command: Command<A>, args: A): void {
+        this.getModified(command)['call'](this.call.bind(this) as ContextCall, args || {})
     }
 }
 
@@ -53,8 +53,8 @@ export function blankContext(): ContextCall {
     return new ContextClass().make(null)
 }
 
-export function callOnInit<A extends any[]>(command: Command<A>, ...args: A) {
+export function callOnInit<A extends CommandArguments>(command: Command<A>, args: A) {
     setTimeout(() => {
-        blankContext()(command, ...args)
+        blankContext()(command, args)
     }, 1)
 }

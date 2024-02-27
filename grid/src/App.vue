@@ -40,25 +40,25 @@
   .on(DoubleClickInput(), target => {
     let call = blankContext()
     hideFromGrid(call, target)
-    call(memoryState.removeEntry, target.uid)
+    call(memoryState.removeEntry, {eid: target.uid})
   })
   function hideFromGrid(call: ContextCall, target: Entity) {
     let otherLetters = displayState.reader.getOwnedBy(target)
     for(let pos of otherLetters) {
-      call(displayState.removeAt, ...pos, target)
-      if(displayState.reader.getOwnersAt(...pos).length == 0) call(gridUpdater.disablePos, ...pos)
+      call(displayState.removeAt, {...pos, owner: target})
+      if(displayState.reader.getOwnersAt(pos.x, pos.y).length == 0) call(gridUpdater.disablePos, pos)
     }
   }
   
   const scatterModel = new ModelScatter(
-    Command.combine<[x: number, y: number, char: string, owner: Entity]>(
+    Command.combine<{x: number, y: number, char: string, owner: Entity}>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (call: ContextCall, x: number, y: number, value: string, owner: Entity) => call(displayState.setAt, x, y, value, owner.withInput(scatterInputProxy.acceptor))
+      (call: ContextCall, args) => call(displayState.setAt, {...args, owner: args.owner.withInput(scatterInputProxy.acceptor)})
     ), 
     displayState.reader
   )
-  memoryState.listeners.add((call: ContextCall, {value}, eid) => call(scatterModel.displayEntry, value, eid))
+  memoryState.listeners.add((call: ContextCall, {entry: {value}, eid}) => call(scatterModel.displayEntry, {entry: value, eid}))
 
 
 
@@ -71,23 +71,23 @@
   const headerEntity = anonymousEntity()
     .withInput(
       gridInputProxy.subset()
-        .on(ClickInput(), () => {blankContext()(cyclicState.cycleNext)})
+        .on(ClickInput(), () => {blankContext()(cyclicState.cycleNext, {})})
         .acceptor
     )
   const headerModel = new ModelHeader(
-    Command.combine<[x: number, y: number, char: string]>(
+    Command.combine<{x: number, y: number, char: string}>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (call: ContextCall, x: number, y: number) => call(gridUpdater.setColor, x, y, cyclicState.reader.getCurrent('color')),
-      (call: ContextCall, x: number, y: number, value: string) => call(displayState.setAt, x, y, value, headerEntity)
+      (call: ContextCall, args) => call(gridUpdater.setColor, {...args, color: cyclicState.reader.getCurrent('color')}),
+      (call: ContextCall, args) => call(displayState.setAt, {...args, owner: headerEntity})
     ), 
     displayState.reader
   )
-  cyclicState.listeners.add(Command.combine<[value: { label: string; }]>(
+  cyclicState.listeners.add(Command.combine<{value: { label: string; }}>(
     (call: ContextCall) => hideFromGrid(call, headerEntity),
-    (call: ContextCall, {label}) =>  call(headerModel.setContent, label),
+    (call: ContextCall, {value: {label}}) =>  call(headerModel.setContent, {content: label}),
   ))
-  callOnInit(headerModel.setContent, cyclicState.reader.getCurrent("label"))
+  callOnInit(headerModel.setContent, {content: cyclicState.reader.getCurrent("label")})
   entryCreationContext.registerModifier(memoryState.addEntry, ()=>true, command=>{
     console.log("Modification!")
     return command
@@ -96,7 +96,7 @@
 
 <template>
   <GridRenderer :rows="rows" :columns="columns" :bind="gridUpdater" ref="gridRenderer"/>
-  <InputRenderer :rows="rows" @onNewEntry="entryCreationContext.make(null)(memoryState.addEntry, {value: $event})"/>
+  <InputRenderer :rows="rows" @onNewEntry="entryCreationContext.make(null)(memoryState.addEntry, {entry: {value: $event}})"/>
 </template>
 
 <style>

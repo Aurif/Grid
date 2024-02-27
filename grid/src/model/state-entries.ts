@@ -6,7 +6,7 @@ import { watch, type Ref } from "vue";
 export type Entry = {value: string, [key: string]: any}
 export default class StateEntries {
     entries: {[id: string]: Entry} = {};
-    readonly listeners = new Listeners<[entry: Entry, owner: string]>()
+    readonly listeners = new Listeners<{entry: Entry, eid: string}>()
     private contextClass: ContextClass<Entry>
     
     constructor(trigger: Ref | Ref[], contextClass: ContextClass<Entry>) {
@@ -18,17 +18,17 @@ export default class StateEntries {
     fullListenerBroadcast() {
         for (const eid in this.entries) {
             const call = this.contextClass.make({...this.entries[eid]})
-            this.listeners.emit(call, this.entries[eid], eid)
+            this.listeners.emit(call, {entry: this.entries[eid], eid})
         }
     }
 
-    addEntry = command((call: ContextCall, entry: Entry) => {
+    addEntry = command((call: ContextCall, {entry}: {entry: Entry}) => {
         const eid = ''+Date.now()
         this.entries[eid] = entry;
-        this.listeners.emit(call, entry, eid)
+        this.listeners.emit(call, {entry, eid})
     })
 
-    removeEntry = command((_call: ContextCall, eid: string) => {
+    removeEntry = command((_call: ContextCall, {eid}: {eid: string}) => {
         if (!this.entries[eid]) throw Error("Tried removing non-existent entry "+eid)
         delete this.entries[eid]
     })
