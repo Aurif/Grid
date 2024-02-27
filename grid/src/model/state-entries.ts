@@ -1,5 +1,5 @@
 import { command, enableCommandLogging } from "@/common/command";
-import { blankContext, type ContextCall } from "@/common/context";
+import { ContextClass, type ContextCall } from "@/common/context";
 import Listeners from "@/common/listeners";
 import { watch, type Ref } from "vue";
 
@@ -7,15 +7,17 @@ export type Entry = {value: string, [key: string]: any}
 export default class StateEntries {
     entries: {[id: string]: Entry} = {};
     readonly listeners = new Listeners<[entry: Entry, owner: string]>()
+    private contextClass: ContextClass<Entry>
     
-    constructor(trigger: Ref | Ref[]) {
+    constructor(trigger: Ref | Ref[], contextClass: ContextClass<Entry>) {
+        this.contextClass = contextClass
         watch(trigger, () => this.fullListenerBroadcast(), { flush: 'post' });
         enableCommandLogging(this);
     }
 
     fullListenerBroadcast() {
-        const call = blankContext()
         for (const eid in this.entries) {
+            const call = this.contextClass.make({...this.entries[eid]})
             this.listeners.emit(call, this.entries[eid], eid)
         }
     }

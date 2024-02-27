@@ -13,10 +13,11 @@
   import DoubleClickInput from "./input/double-click";
   import MultiInputProxy from './input/multi-input-proxy';
   import Entity, { anonymousEntity } from './common/entity';
-  import { makeContext, blankContext, type ContextCall, callOnInit } from './common/context';
+  import { blankContext, type ContextCall, callOnInit, ContextClass } from './common/context';
   import ModelHeader from './model/model-header';
   import { StateCyclic } from './model/state-cyclic';
   import ClickInput from "./input/click";
+  import type { Entry } from './model/state-entries';
 
   const { rows, columns } = determinePositioning()
   const displayState = new StateDisplay(rows, columns)
@@ -25,7 +26,10 @@
   const gridRendererProxy = new GridRendererProxy(gridRenderer)
   const gridUpdater = new GridUpdater(gridRendererProxy)
   
-  const memoryState = new StateEntriesGist([rows, columns])
+  const entryCreationContext = new ContextClass<null>()
+  const entryContext = new ContextClass<Entry>()
+
+  const memoryState = new StateEntriesGist([rows, columns], entryContext)
   const gridInputProxy = new MultiInputProxy(el => {
     let pos = gridRendererProxy.spanToPos(el)
     if (!pos) return 
@@ -84,11 +88,15 @@
     (call: ContextCall, {label}) =>  call(headerModel.setContent, label),
   ))
   callOnInit(headerModel.setContent, cyclicState.reader.getCurrent("label"))
+  entryCreationContext.registerModifier(memoryState.addEntry, ()=>true, command=>{
+    console.log("Modification!")
+    return command
+  })
 </script>
 
 <template>
   <GridRenderer :rows="rows" :columns="columns" :bind="gridUpdater" ref="gridRenderer"/>
-  <InputRenderer :rows="rows" @onNewEntry="makeContext($event)(memoryState.addEntry, {value: $event})"/>
+  <InputRenderer :rows="rows" @onNewEntry="entryCreationContext.make(null)(memoryState.addEntry, {value: $event})"/>
 </template>
 
 <style>

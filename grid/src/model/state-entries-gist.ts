@@ -1,4 +1,3 @@
-import type { Ref } from "vue";
 import StateEntries, { type Entry } from "./state-entries";
 import { gistToken, gistId } from "@/secrets";
 import { Octokit } from "octokit";
@@ -6,8 +5,8 @@ import { Octokit } from "octokit";
 const octokit = new Octokit({ auth: gistToken });
 
 export default class StateEntriesGist extends StateEntries {
-    constructor(trigger: Ref | Ref[]) {
-        super(trigger);
+    constructor(...args: ConstructorParameters<typeof StateEntries>) {
+        super(...args);
         this.loadFromRemote().then(() => { this.fullListenerBroadcast(); });
         this.addEntry.addPostCall(this.pushToRemote.bind(this))
         this.removeEntry.addPostCall(this.pushToRemote.bind(this))
