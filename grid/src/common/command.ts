@@ -38,14 +38,17 @@ export class Command<A extends CommandArguments>  {
 
 
 
-    public mapParameter<K extends keyof A, B extends CommandArguments, F extends (args: ModifiedCommandArguments<A, K, B>)=>A[K]>(parameter: K, mapping: F): Command<ModifiedCommandArguments<A, K, B>> {
+    public mapArg<K extends keyof A, B extends CommandArguments, F extends (args: ModifiedCommandArguments<A, K, B>)=>A[K]>(parameter: K, mapping: F): Command<ModifiedCommandArguments<A, K, B>> {
         return new Command([
             (call, args) => {this.callDirect(call, {...args, [parameter]: mapping(args)} as A)}
         ], this)
     }
 
-    public addPostCall<F extends ((call: ContextCall, args: A)=>void)>(func: F) {
-        this.actions.push(func)
+    public addPostCall(command: Command<A>) {
+        return new Command([
+            (call, args: A) => {this.callDirect(call, args)},
+            (call: ContextCall, args: A)=>call(command, args)
+        ], this)
     }
 
 

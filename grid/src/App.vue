@@ -55,7 +55,7 @@
     Command.combine<{x: number, y: number, char: string, owner: Entity}>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      displayState.setAt.mapParameter('owner', ({owner})=>owner.withInput(scatterInputProxy.acceptor))
+      displayState.setAt.mapArg('owner', ({owner})=>owner.withInput(scatterInputProxy.acceptor))
     ), 
     displayState.reader
   )
@@ -79,19 +79,19 @@
     Command.combine<{x: number, y: number, char: string}>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      gridUpdater.setColor.mapParameter("color", ()=>cyclicState.reader.getCurrent('color')),
-      displayState.setAt.mapParameter('owner', ()=>headerEntity)
+      gridUpdater.setColor.mapArg("color", ()=>cyclicState.reader.getCurrent('color')),
+      displayState.setAt.mapArg('owner', ()=>headerEntity)
     ), 
     displayState.reader
   )
   cyclicState.listeners.add(Command.combine<{value: { label: string; }}>(
     (call: ContextCall) => hideFromGrid(call, headerEntity),
-    headerModel.setContent.mapParameter("content", ({value: {label}})=>label)
+    headerModel.setContent.mapArg("content", ({value: {label}})=>label)
   ))
   callOnInit(headerModel.setContent, {content: cyclicState.reader.getCurrent("label")})
   entryCreationContext.registerModifier(memoryState.addEntry, command=>{
     if (!cyclicState.reader.getCurrent('mark')) return command
-    return command.mapParameter("entry", ({entry})=>({...entry, type: cyclicState.reader.getCurrent("mark")}))
+    return command.mapArg("entry", ({entry})=>({...entry, type: cyclicState.reader.getCurrent("mark")}))
   })
 </script>
 

@@ -1,3 +1,4 @@
+import { command } from "@/common/command";
 import StateEntries, { type Entry } from "./state-entries";
 import { gistToken, gistId } from "@/secrets";
 import { Octokit } from "octokit";
@@ -8,8 +9,8 @@ export default class StateEntriesGist extends StateEntries {
     constructor(...args: ConstructorParameters<typeof StateEntries>) {
         super(...args);
         this.loadFromRemote().then(() => { this.fullListenerBroadcast(); });
-        this.addEntry.addPostCall(this.pushToRemote.bind(this))
-        this.removeEntry.addPostCall(this.pushToRemote.bind(this))
+        this.addEntry = this.addEntry.addPostCall(this.pushToRemote)
+        this.removeEntry = this.removeEntry.addPostCall(this.pushToRemote)
     }
 
     private async loadFromRemote() {
@@ -28,9 +29,8 @@ export default class StateEntriesGist extends StateEntries {
         this.entries = remoteData
     }
 
-    private async pushToRemote() {
-        this.entries = await this.entries;
-        await octokit.request(`PATCH /gists/{gist_id}`, {
+    private pushToRemote = command(() => {
+        octokit.request(`PATCH /gists/{gist_id}`, {
             gist_id: gistId,
             headers: { 'X-GitHub-Api-Version': '2022-11-28' },
             files: {
@@ -39,5 +39,5 @@ export default class StateEntriesGist extends StateEntries {
                 }
             }
         })
-    }
+    })
 }
