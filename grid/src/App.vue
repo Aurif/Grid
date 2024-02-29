@@ -18,6 +18,7 @@
   import { StateCyclic } from './model/state-cyclic';
   import ClickInput from "./input/click";
   import type { Entry } from './model/state-entries';
+  import PresetUtil from './common/presetUtil';
 
   const { rows, columns } = determinePositioning()
   const displayState = new StateDisplay(rows, columns)
@@ -61,13 +62,13 @@
   memoryState.listeners.add((call: ContextCall, {entry: {value}, eid}) => call(scatterModel.displayEntry, {entry: value, eid}))
 
 
-
-  const cyclicState = new StateCyclic([
-    {label: "TODAY", color: '#f98f71'},
+  const timeStages = new PresetUtil([
+    {label: "TODAY", color: '#f98f71', mark: 'day'},
     {label: "THIS WEEK"},
-    {label: "THIS MONTH", color: '#9673a4'},
-    {label: "NEXT 4 MONTHS", color: '#4a5c78'},
+    {label: "THIS MONTH", color: '#9673a4', mark: 'month'},
+    {label: "NEXT 4 MONTHS", color: '#4a5c78', mark: 'quarter'},
   ])
+  const cyclicState = new StateCyclic(timeStages.values)
   const headerEntity = anonymousEntity()
     .withInput(
       gridInputProxy.subset()
@@ -88,9 +89,9 @@
     headerModel.setContent.mapParameter("content", ({value: {label}})=>label)
   ))
   callOnInit(headerModel.setContent, {content: cyclicState.reader.getCurrent("label")})
-  entryCreationContext.registerModifier(memoryState.addEntry, ()=>true, command=>{
-    console.log("Modification!")
-    return command
+  entryCreationContext.registerModifier(memoryState.addEntry, command=>{
+    if (!cyclicState.reader.getCurrent('mark')) return command
+    return command.mapParameter("entry", ({entry})=>({...entry, type: cyclicState.reader.getCurrent("mark")}))
   })
 </script>
 

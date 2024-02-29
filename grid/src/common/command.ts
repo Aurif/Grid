@@ -16,7 +16,6 @@ export class Command<A extends CommandArguments>  {
     constructor(actions: ((call: ContextCall, args: A)=>void)[], source?: Command<any>) {
         this.actions = actions
         if(source) {
-            this.name = source.name
             this.uid = source.uid
         }
     }
