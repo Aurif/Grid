@@ -13,7 +13,11 @@ export default class MultiInputProxy {
 
     bindMapping(input: Input) {
         if(!this.inputUidCache.has(input.uid)) {
-            input.addListener(el => this.mapping(el)?.trigger(input))
+            input.addListener(el => {
+                const target = this.mapping(el)
+                target?.trigger(input)
+                return !!target
+            })
             this.inputUidCache.add(input.uid)
         }
     }

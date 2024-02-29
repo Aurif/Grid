@@ -10,15 +10,18 @@
   import { ref } from 'vue';
   import GridRendererProxy from "./view/grid-renderer-proxy"
   import type { ComponentRef } from './common/types';
-  import DoubleClickInput from "./input/double-click";
+  import InputClickDouble from "./input/triggers/click-double";
   import MultiInputProxy from './input/multi-input-proxy';
   import Entity, { anonymousEntity } from './common/entity';
   import { blankContext, type ContextCall, callOnInit, ContextClass } from './common/context';
   import ModelHeader from './model/model-header';
   import { StateCyclic } from './model/state-cyclic';
-  import ClickInput from "./input/click";
+  import InputClick from "./input/triggers/click";
   import type { Entry } from './model/state-entries';
-  import PresetUtil from './common/presetUtil';
+  import PresetUtil from './common/preset-util';
+  import InputClickRight from './input/triggers/click-right';
+  import InputScrollDown from './input/triggers/scroll-down';
+  import InputScrollUp from './input/triggers/scroll-up';
 
   const { rows, columns } = determinePositioning()
   const displayState = new StateDisplay(rows, columns)
@@ -38,7 +41,7 @@
     if (owners.length == 1) return owners[0].inputAcceptor
   })
   const scatterInputProxy = gridInputProxy.subset()
-  .on(DoubleClickInput(), target => {
+  .on(InputClickDouble(), target => {
     let call = blankContext()
     hideFromGrid(call, target)
     call(memoryState.removeEntry, {eid: target.uid})
@@ -72,7 +75,10 @@
   const headerEntity = anonymousEntity()
     .withInput(
       gridInputProxy.subset()
-        .on(ClickInput(), () => {blankContext()(cyclicState.cycleNext, {})})
+        .on(InputClick(), () => {blankContext()(cyclicState.cycleNext, {})})
+        .on(InputClickRight(), () => {blankContext()(cyclicState.cyclePrev, {})})
+        .on(InputScrollDown(), () => {blankContext()(cyclicState.cycleNext, {})})
+        .on(InputScrollUp(), () => {blankContext()(cyclicState.cyclePrev, {})})
         .acceptor
     )
   const headerModel = new ModelHeader(

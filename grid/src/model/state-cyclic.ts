@@ -17,6 +17,11 @@ export class StateCyclic<T extends {}> {
         this.listeners.emit(call, {value: {...this.values[this.index]}})
     })
 
+    cyclePrev = command((call: ContextCall) => {
+        this.index = (this.index-1+this.values.length)%this.values.length
+        this.listeners.emit(call, {value: {...this.values[this.index]}})
+    })
+
     get reader() {
         return new StateCyclicReader(this);
     }
