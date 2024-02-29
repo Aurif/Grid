@@ -1,19 +1,19 @@
 import type { Command, CommandArguments } from "./command"
 
-type Modifier<A extends CommandArguments> = (command: Command<A>)=>Command<A>
+type Modifier<A extends CommandArguments, C> = (command: Command<A>, context: C)=>Command<A>
 export class ContextClass<C> {
-    private modifiers: {[key: string]: Modifier<any>[]} = {}
-    registerModifier<A extends CommandArguments>(command: Command<A>, modifier: Modifier<A>) {
+    private modifiers: {[key: string]: Modifier<any, C>[]} = {}
+    registerModifier<A extends CommandArguments>(command: Command<A>, modifier: Modifier<A, C>) {
         if (!this.modifiers[command.uid]) this.modifiers[command.uid] = []
         this.modifiers[command.uid].push(modifier)
     }
     
 
-    private getModified<A extends CommandArguments>(command: Command<A>): Command<A> {
+    private getModified<A extends CommandArguments>(command: Command<A>, context: C): Command<A> {
         const commandUid = command.uid
         let currentCommand = command
         for (const modifier of (this.modifiers[commandUid] || [])) {
-            currentCommand = modifier(currentCommand)
+            currentCommand = modifier(currentCommand, context)
             if (currentCommand.uid != commandUid) throw Error("A command modifier cannot change the command's type")
         }
         return currentCommand
@@ -35,7 +35,7 @@ class Context<C> {
     }
 
     private getModified<A extends CommandArguments>(command: Command<A>): Command<A> {
-        if (!this.commandCache[command.uid]) this.commandCache[command.uid] = this.parent["getModified"](command)
+        if (!this.commandCache[command.uid]) this.commandCache[command.uid] = this.parent["getModified"](command, this.value)
         return this.commandCache[command.uid]
     }
 

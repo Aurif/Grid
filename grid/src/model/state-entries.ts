@@ -25,7 +25,8 @@ export default class StateEntries {
     addEntry = command((call: ContextCall, {entry}: {entry: Entry}) => {
         const eid = ''+Date.now()
         this.entries[eid] = entry;
-        this.listeners.emit(call, {entry, eid})
+        const newCall = this.contextClass.make({...entry})
+        this.listeners.emit(newCall, {entry, eid})
     })
 
     removeEntry = command((_call: ContextCall, {eid}: {eid: string}) => {

@@ -44,7 +44,7 @@ export class Command<A extends CommandArguments>  {
         ], this)
     }
 
-    public addPostCall(command: Command<A>) {
+    public addPostCall(command: Command<A>): Command<A> {
         return new Command([
             (call, args: A) => {this.callDirect(call, args)},
             (call: ContextCall, args: A)=>call(command, args)

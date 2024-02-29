@@ -65,8 +65,8 @@
   const timeStages = new PresetUtil([
     {label: "TODAY", color: '#f98f71', mark: 'day'},
     {label: "THIS WEEK"},
-    {label: "THIS MONTH", color: '#9673a4', mark: 'month'},
-    {label: "NEXT 4 MONTHS", color: '#4a5c78', mark: 'quarter'},
+    {label: "THIS MONTH", color: '#765c81', mark: 'month'},
+    {label: "NEXT 4 MONTHS", color: '#384456', mark: 'quarter'},
   ])
   const cyclicState = new StateCyclic(timeStages.values)
   const headerEntity = anonymousEntity()
@@ -76,7 +76,7 @@
         .acceptor
     )
   const headerModel = new ModelHeader(
-    Command.combine<{x: number, y: number, char: string}>(
+    Command.combine(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
       gridUpdater.setColor.mapArg("color", ()=>cyclicState.reader.getCurrent('color')),
@@ -84,14 +84,18 @@
     ), 
     displayState.reader
   )
-  cyclicState.listeners.add(Command.combine<{value: { label: string; }}>(
+  cyclicState.listeners.add(Command.combine(
     (call: ContextCall) => hideFromGrid(call, headerEntity),
     headerModel.setContent.mapArg("content", ({value: {label}})=>label)
   ))
   callOnInit(headerModel.setContent, {content: cyclicState.reader.getCurrent("label")})
   entryCreationContext.registerModifier(memoryState.addEntry, command=>{
     if (!cyclicState.reader.getCurrent('mark')) return command
-    return command.mapArg("entry", ({entry})=>({...entry, type: cyclicState.reader.getCurrent("mark")}))
+    return command.mapArg("entry", ({entry})=>({...entry, 'time-stage': cyclicState.reader.getCurrent("mark")}))
+  })
+  entryContext.registerModifier(gridUpdater.setChar, (command, context)=>{
+    if (!context['time-stage']) return command
+    return command.addPostCall(gridUpdater.setColor.mapArg("color", ()=>timeStages.getBy('mark', context['time-stage']).color))
   })
 </script>
 
