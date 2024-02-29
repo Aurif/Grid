@@ -54,7 +54,7 @@
     Command.combine<{x: number, y: number, char: string, owner: Entity}>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (call: ContextCall, args) => call(displayState.setAt, {...args, owner: args.owner.withInput(scatterInputProxy.acceptor)})
+      displayState.setAt.mapParameter('owner', ({owner})=>owner.withInput(scatterInputProxy.acceptor))
     ), 
     displayState.reader
   )
@@ -78,14 +78,14 @@
     Command.combine<{x: number, y: number, char: string}>(
       gridUpdater.setChar, 
       gridUpdater.enablePos, 
-      (call: ContextCall, args) => call(gridUpdater.setColor, {...args, color: cyclicState.reader.getCurrent('color')}),
-      (call: ContextCall, args) => call(displayState.setAt, {...args, owner: headerEntity})
+      gridUpdater.setColor.mapParameter("color", ()=>cyclicState.reader.getCurrent('color')),
+      displayState.setAt.mapParameter('owner', ()=>headerEntity)
     ), 
     displayState.reader
   )
   cyclicState.listeners.add(Command.combine<{value: { label: string; }}>(
     (call: ContextCall) => hideFromGrid(call, headerEntity),
-    (call: ContextCall, {value: {label}}) =>  call(headerModel.setContent, {content: label}),
+    headerModel.setContent.mapParameter("content", ({value: {label}})=>label)
   ))
   callOnInit(headerModel.setContent, {content: cyclicState.reader.getCurrent("label")})
   entryCreationContext.registerModifier(memoryState.addEntry, ()=>true, command=>{

@@ -44,7 +44,7 @@ class Context<C> {
     }
 
     public call<A extends CommandArguments>(command: Command<A>, args: A): void {
-        this.getModified(command)['call'](this.call.bind(this) as ContextCall, args || {})
+        this.getModified(command)['callDirect'](this.call.bind(this) as ContextCall, args || {})
     }
 }
 
