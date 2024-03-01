@@ -52,4 +52,12 @@ export default class ModelScatter {
         if (!pos) throw new Error('No position found');
         for(const [i, char] of entry.split('').entries()) call(this.renderCommand, {...pos(i), char, owner: new Entity(eid)});
     })
+
+    updateEntry = command((call: ContextCall, {eid}: {eid: string}) => {
+        const pos = this.state.getOwnedBy(new Entity(eid));
+        if (pos.length == 0) throw new Error('Tried updating non-existent entry');
+        for(const {x, y} of pos) {
+            call(this.renderCommand, {x, y, char: this.state.getAt(x, y)!, owner: new Entity(eid)})
+        }
+    })
 }

@@ -6,7 +6,8 @@ import { watch, type Ref } from "vue";
 export type Entry = {value: string, [key: string]: any}
 export default class StateEntries {
     entries: {[id: string]: Entry} = {};
-    readonly listeners = new Listeners<{entry: Entry, eid: string}>()
+    readonly onNewEntry = new Listeners<{entry: Entry, eid: string}>()
+    readonly onUpdateEntry = new Listeners<{entry: Entry, eid: string}>()
     private contextClass: ContextClass<Entry>
     
     constructor(trigger: Ref | Ref[], contextClass: ContextClass<Entry>) {
@@ -18,7 +19,7 @@ export default class StateEntries {
     fullListenerBroadcast() {
         for (const eid in this.entries) {
             const call = this.contextClass.make({...this.entries[eid]})
-            this.listeners.emit(call, {entry: this.entries[eid], eid})
+            this.onNewEntry.emit(call, {entry: this.entries[eid], eid})
         }
     }
 
@@ -26,7 +27,14 @@ export default class StateEntries {
         const eid = ''+Date.now()
         this.entries[eid] = entry;
         const newCall = this.contextClass.make({...entry})
-        this.listeners.emit(newCall, {entry, eid})
+        this.onNewEntry.emit(newCall, {entry, eid})
+    })
+
+    updateEntry = command((call: ContextCall, {entry, eid}: {entry: Entry, eid: string}) => {
+        if (!this.entries[eid]) throw new Error('Tried updating non-existent entry');
+        this.entries[eid] = entry;
+        const newCall = this.contextClass.make({...entry})
+        this.onUpdateEntry.emit(newCall, {entry, eid})
     })
 
     removeEntry = command((_call: ContextCall, {eid}: {eid: string}) => {

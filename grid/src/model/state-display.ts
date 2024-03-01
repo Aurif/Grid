@@ -26,11 +26,15 @@ export default class StateDisplay {
         } else if (this.state[`${x}:${y}`].char != char) {
             throw Error(`Tried overwrite display state with conflicting char at ${x}:${y} (${this.state[`${x}:${y}`].char}->${char})`)
         } else {
-            this.state[`${x}:${y}`].owners.push(owner)
+            let ownerIndex;
+            if((ownerIndex = this.state[`${x}:${y}`].owners.map(o => o.uid).indexOf(owner.uid)) === -1)
+                this.state[`${x}:${y}`].owners.push(owner)
+            this.state[`${x}:${y}`].owners[ownerIndex] = owner
         }
 
         if(!this.ownerMapping[owner.uid]) this.ownerMapping[owner.uid] = []
-        this.ownerMapping[owner.uid].push([x, y])
+        if(this.ownerMapping[owner.uid].map(([ix, iy])=>`${ix}:${iy}`).indexOf(`${x}:${y}`) === -1)
+            this.ownerMapping[owner.uid].push([x, y])
     })
 
     removeAt = command((_call: ContextCall, {x, y, owner}: {x: number, y: number, owner: Entity}) => {

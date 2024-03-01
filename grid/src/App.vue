@@ -62,7 +62,8 @@
     ), 
     displayState.reader
   )
-  memoryState.listeners.add((call: ContextCall, {entry: {value}, eid}) => call(scatterModel.displayEntry, {entry: value, eid}))
+  memoryState.onNewEntry.add((call: ContextCall, {entry: {value}, eid}) => call(scatterModel.displayEntry, {entry: value, eid}))
+  memoryState.onUpdateEntry.add((call: ContextCall, {eid}) => call(scatterModel.updateEntry, {eid}))
 
 
   const timeStages = new PresetUtil([
@@ -100,8 +101,17 @@
     return command.mapArg("entry", ({entry})=>({...entry, 'time-stage': cyclicState.reader.getCurrent("mark")}))
   })
   entryContext.registerModifier(gridUpdater.setChar, (command, context)=>{
-    if (!context['time-stage']) return command
     return command.addPostCall(gridUpdater.setColor.mapArg("color", ()=>timeStages.getBy('mark', context['time-stage']).color))
+  })
+  entryContext.registerModifier(displayState.setAt, (command, context)=>{
+    if (context['time-stage'] == timeStages.getAt(0).mark) return command
+    const modifiedInputProxy = gridInputProxy.subset()
+      .on(InputClickDouble(), target => {
+        let call = blankContext()
+        let newStage = timeStages.getAt(timeStages.getIndexBy('mark', context['time-stage'])-1).mark
+        call(memoryState.updateEntry, {eid: target.uid, entry: {...context, 'time-stage': newStage}})
+      }).acceptor
+    return command.mapArg("owner", ({owner})=>owner.withInput(modifiedInputProxy))
   })
 </script>
 
