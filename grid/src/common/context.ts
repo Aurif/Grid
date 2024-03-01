@@ -1,4 +1,4 @@
-import type { Command, CommandArguments } from "./command"
+import { Command, type CommandArguments } from "./command"
 
 type Modifier<A extends CommandArguments, C> = (command: Command<A>, context: C)=>Command<A>
 export class ContextClass<C> {
@@ -8,14 +8,17 @@ export class ContextClass<C> {
         this.modifiers[command.uid].push(modifier)
     }
     
+    private disarmCommand<A extends CommandArguments>(command: Command<A>): Command<A> {
+        return new Command([
+            (call, args) => {command['callDirect'](call, args)}
+        ])
+    }
 
     private getModified<A extends CommandArguments>(command: Command<A>, context: C): Command<A> {
         const commandUid = command.uid
-        let currentCommand = command
-        for (const modifier of (this.modifiers[commandUid] || [])) {
+        let currentCommand = this.disarmCommand(command)
+        for (const modifier of (this.modifiers[commandUid] || []))
             currentCommand = modifier(currentCommand, context)
-            if (currentCommand.uid != commandUid) throw Error("A command modifier cannot change the command's type")
-        }
         return currentCommand
     }
 

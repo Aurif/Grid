@@ -13,19 +13,14 @@ export class Command<A extends CommandArguments>  {
     readonly uid: string = 'command-'+uuidv4()
     private name?: string
     private actions: ((call: ContextCall, args: A)=>void)[]
-    constructor(actions: ((call: ContextCall, args: A)=>void)[], source?: Command<any>) {
+    constructor(actions: ((call: ContextCall, args: A)=>void)[]) {
         this.actions = actions
-        if(source) {
-            this.uid = source.uid
-        }
     }
 
     public setName(name: string) {
         if (this.name) throw Error(`Tried assigning name to a command which already had a name (old: ${this.name}, new: ${name})`)
         this.name = name
     }
-
-
 
 
     private callDirect(call: ContextCall, args: A) {
@@ -40,15 +35,15 @@ export class Command<A extends CommandArguments>  {
 
     public mapArg<K extends keyof A, B extends CommandArguments, F extends (args: ModifiedCommandArguments<A, K, B>)=>A[K]>(parameter: K, mapping: F): Command<ModifiedCommandArguments<A, K, B>> {
         return new Command([
-            (call, args) => {this.callDirect(call, {...args, [parameter]: mapping(args)} as A)}
-        ], this)
+            (call, args) => {call(this, {...args, [parameter]: mapping(args)} as A)}
+        ])
     }
 
     public addPostCall(command: Command<A>): Command<A> {
         return new Command([
-            (call, args: A) => {this.callDirect(call, args)},
+            (call, args: A) => {call(this, args)},
             (call: ContextCall, args: A)=>call(command, args)
-        ], this)
+        ])
     }
 
 
