@@ -1,9 +1,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-type keyframe = {t: number, a: number, x?: number, y?: number}
+type keyframe = {t: number, x: number, y: number}
 export default class LetterPositioning {
-    private letterElement: HTMLSpanElement
+    readonly letterElement: HTMLSpanElement
     private positions: {x: keyframe[], y: keyframe[]} = {x: [], y: []}
     private marks: {x: {[key: number]: boolean}, y: {[key: number]: boolean}} = {x: {}, y: {}}
     constructor(letterElement: HTMLSpanElement) {
@@ -14,10 +14,10 @@ export default class LetterPositioning {
         function randomMove(start: keyframe, t: number): keyframe {
             const dist = Math.abs(start.t-t)/100;
             if(start.x == undefined || start.y == undefined) throw Error("Cannot perform a random move with a start that doesn't have x, y values")
-            const newX = start.x + dist*(Math.random()*window.innerWidth-window.innerWidth/2)*0.35
-            const newY = start.y + dist*(Math.random()*window.innerHeight-window.innerHeight/2)*0.35
+            const newX = start.x + dist*(Math.random()*window.innerWidth-window.innerWidth/2)*0.65
+            const newY = start.y + dist*(Math.random()*window.innerHeight-window.innerHeight/2)*0.65
 
-            return {t, x: newX, y: newY, a: 0}
+            return {t, x: newX, y: newY}
         }
 
         const newPositions = [...positions]
@@ -29,8 +29,7 @@ export default class LetterPositioning {
             newPositions.push({
                 t: 0,
                 x: Math.round(Math.random()*window.innerWidth-window.innerWidth/2),
-                y: Math.round(Math.random()*window.innerHeight-window.innerHeight/2),
-                a: 0
+                y: Math.round(Math.random()*window.innerHeight-window.innerHeight/2)
             })
         }
 
@@ -48,15 +47,13 @@ export default class LetterPositioning {
     public addPosition(triggerPos: {x: number, y: number}, targetPos: {x: number, y: number}) {
         if(!this.canUseTriggerAt(triggerPos.x, triggerPos.y)) throw Error('Forbidden trigger coordinates - those values are already reserved')
         const xSplit = Math.random()*2-0.5, ySplit = Math.random()*2-0.5;
-        const targetX = targetPos.x-window.innerWidth/2, targetY = targetPos.y-window.innerHeight/2;
+        const targetX = targetPos.x, targetY = targetPos.y;
         const xC1 = Math.round(targetX*xSplit), yC1 = Math.round(targetY*ySplit);
         const xC2 = targetX-xC1, yC2 = targetY-yC1;
 
         function pushWithMargins(target: keyframe[], {x, y, t}: {x: number, y: number, t: number}) {
-            target.push({t: t+3.5, a: 0})
-            target.push({x: x, y: y, t: t+2.5, a: 1})
-            target.push({x: x, y: y, t: t-2.5, a: 1})
-            target.push({t: t-3.5, a: 0})
+            target.push({x: x, y: y, t: t+1.5})
+            target.push({x: x, y: y, t: t-1.5})
         }
         const trigX = triggerPos.x/window.innerWidth*100, trigY = triggerPos.y/window.innerHeight*100
         pushWithMargins(this.positions.x, {x: xC1, y: yC1, t: Math.round(trigX*10)/10})
@@ -66,22 +63,16 @@ export default class LetterPositioning {
     }
 
     public applyPositions() {
-        function generateAnimation(name: string, positions: keyframe[], mappingFunc: (x: number, y: number)=>string, opacityKeyword: string): HTMLStyleElement {
-            function keyframeMapping(keyframe: keyframe) {
-                return `${keyframe.t}% {
-                    ${keyframe.x!=undefined && keyframe.y!=undefined ? mappingFunc(keyframe.x, keyframe.y) : ''}
-                    ${opacityKeyword}: ${keyframe.a};
-                }`
-            }
+        function generateAnimation(name: string, positions: keyframe[], mappingFunc: (x: number, y: number)=>string): HTMLStyleElement {
             const style = document.createElement('style');
             style.type = 'text/css';
-            style.innerHTML = `@keyframes ${name} { ${positions.map(keyframeMapping).join('\n')} }`
+            style.innerHTML = `@keyframes ${name} { ${positions.map(({t, x, y}) => `${t}% {${mappingFunc(x, y)}}`).join('\n')} }`
             return style
         }
 
         const animationName = 'a-'+uuidv4()
-        this.letterElement.appendChild(generateAnimation(animationName+'-x', this.withRandomizedEdgePositions(this.positions.x), (x, y) => `transform: translate(${x}px, ${y}px);`, '--opacity-x'))
-        this.letterElement.appendChild(generateAnimation(animationName+'-y', this.withRandomizedEdgePositions(this.positions.y), (x, y) => `left: ${x}px; top: ${y}px;`, '--opacity-y'))
+        this.letterElement.appendChild(generateAnimation(animationName+'-x', this.withRandomizedEdgePositions(this.positions.x), (x, y) => `transform: translate(${x}px, ${y}px);`))
+        this.letterElement.appendChild(generateAnimation(animationName+'-y', this.withRandomizedEdgePositions(this.positions.y), (x, y) => `left: ${x}px; top: ${y}px;`))
         this.letterElement.style.setProperty('animation-name', `${animationName}-x, ${animationName}-y`)
     }
 
