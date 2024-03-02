@@ -3,6 +3,7 @@
   import { v4 as uuidv4 } from 'uuid';
   import * as _ from 'underscore';
 
+  const LETTER_WIDTH = 16, LETTER_HEIGHT = 30
   const span = ref<HTMLSpanElement[] | null>(null)
   class LetterManager {
     private letterPositionings: {[key: string]: LetterPositioning[]} = {}
@@ -17,14 +18,23 @@
         })
     }
 
+    public placeEntryRandomly(entry: string) {
+        const maxY = window.innerHeight/2-LETTER_HEIGHT
+        const maxX = window.innerWidth/2-entry.length/2*LETTER_WIDTH
+        this.placeEntry(
+            window.innerWidth/2+(Math.random()*2-1)*maxX,
+            window.innerHeight/2+(Math.random()*2-1)*maxY,
+            entry
+        )
+    }
+
     public placeEntry(x: number, y: number, entry: string) {
         let charOccurences = entry.split('').reduce((chars, ch) => {chars[ch] = (chars[ch] || 0)+1; return chars}, {} as {[key: string]: number})
         let lettersToUse = _.mapObject(charOccurences, (count: number, char: string) => {
-            return _.shuffle(this.letterPositionings[char]).slice(0,count);
+            return _.shuffle(this.letterPositionings[char].filter(l => l.canUseTriggerAt(x, y))).slice(0,count);
         })
         // TODO: deal with not enough chars
 
-        let LETTER_WIDTH = 16
         let startX = x-(entry.length-1)*LETTER_WIDTH/2
         for(let i = 0; i<entry.length; i++) {
             let char = entry[i]
@@ -48,6 +58,7 @@
   class LetterPositioning {
     private letterElement: HTMLSpanElement
     private positions: {x: keyframe[], y: keyframe[]} = {x: [], y: []}
+    private marks: {x: {[key: number]: boolean}, y: {[key: number]: boolean}} = {x: {}, y: {}}
     constructor(letterElement: HTMLSpanElement) {
         this.letterElement = letterElement
     }
@@ -82,20 +93,29 @@
         return newPositions
     }
 
+    public canUseTriggerAt(x: number, y: number): boolean {
+        let trigX = Math.round(x/window.innerWidth*100), trigY = Math.round(y/window.innerHeight*100)
+        return !(this.marks.x[trigX] || this.marks.y[trigY])
+    }
+
     public addPosition(triggerPos: {x: number, y: number}, targetPos: {x: number, y: number}) {
+        if(!this.canUseTriggerAt(triggerPos.x, triggerPos.y)) throw Error('Forbidden trigger coordinates - those values are already reserved')
         let xSplit = Math.random()*2-0.5, ySplit = Math.random()*2-0.5;
         let targetX = targetPos.x-window.innerWidth/2, targetY = targetPos.y-window.innerHeight/2;
         let xC1 = Math.round(targetX*xSplit), yC1 = Math.round(targetY*ySplit);
         let xC2 = targetX-xC1, yC2 = targetY-yC1;
 
         function pushWithMargins(target: keyframe[], {x, y, t}: {x: number, y: number, t: number}) {
-            target.push({t: t+2.5, a: 0})
-            target.push({x: x, y: y, t: t+1.5, a: 1})
-            target.push({x: x, y: y, t: t-1.5, a: 1})
-            target.push({t: t-2.5, a: 0})
+            target.push({t: t+3.5, a: 0})
+            target.push({x: x, y: y, t: t+2.5, a: 1})
+            target.push({x: x, y: y, t: t-2.5, a: 1})
+            target.push({t: t-3.5, a: 0})
         }
-        pushWithMargins(this.positions.x, {x: xC1, y: yC1, t: Math.round(triggerPos.x/window.innerWidth*1000)/10})
-        pushWithMargins(this.positions.y, {x: xC2, y: yC2, t: Math.round(triggerPos.y/window.innerHeight*1000)/10})
+        let trigX = triggerPos.x/window.innerWidth*100, trigY = triggerPos.y/window.innerHeight*100
+        pushWithMargins(this.positions.x, {x: xC1, y: yC1, t: Math.round(trigX*10)/10})
+        pushWithMargins(this.positions.y, {x: xC2, y: yC2, t: Math.round(trigY*10)/10})
+        for(let i=Math.round(trigX)-9; i<=Math.round(trigX)+9; i++) this.marks.x[i] = true
+        for(let i=Math.round(trigY)-9; i<=Math.round(trigY)+9; i++) this.marks.y[i] = true
     }
 
     public applyPositions() {
@@ -129,9 +149,7 @@
         parentElement.value.style.setProperty('--animation-state-y', Math.round((-e.clientY/window.innerHeight*1000))/10+'s')
     })
     setTimeout(() => {
-        letterManager.placeEntry(window.innerWidth/2, window.innerHeight/2, 'AWO')
-        letterManager.placeEntry(200, 200, 'BRAVE')
-        letterManager.placeEntry(800, 250, 'ABRAKADABRA')
+        for(let entry of ["AWESOME", "AMAZING", "COOL", "OUTSTANDING", "PIPEBOMB"]) letterManager.placeEntryRandomly(entry)
         letterManager.applyPositions()
     }, 100)
   })
