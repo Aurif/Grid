@@ -4,7 +4,7 @@
   import TriggerManager from './trigger-manager'
 
     
-  const triggerList = ref([])
+  const triggerList = ref<{x: number, y: number, id: string}[]>([])
   const triggerManager = new TriggerManager(triggerList)
 
   const span = ref<HTMLSpanElement[] | null>(null)

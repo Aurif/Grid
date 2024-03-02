@@ -3,7 +3,7 @@ import { type Ref } from 'vue';
 
 export default class TriggerManager {
     private triggerList: Ref<{x: number, y: number, id: string}[]>
-    constructor(triggerList: {x: number, y: number, id: string}[]) {
+    constructor(triggerList: Ref<{x: number, y: number, id: string}[]>) {
         this.triggerList = triggerList
     }
 
