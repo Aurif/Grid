@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { determinePositioning } from './input/positioning'
-  import GalaxyRenderer from './view/GalaxyRenderer.vue';
+  import GalaxyRenderer from './view/galaxy/GalaxyRenderer.vue';
   import InputRenderer from './view/InputRenderer.vue'
   const { rows } = determinePositioning()
 </script>
