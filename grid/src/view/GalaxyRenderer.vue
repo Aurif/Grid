@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { onMounted, ref, watch, type Ref } from 'vue';
   import { v4 as uuidv4 } from 'uuid';
+  import * as _ from 'underscore';
 
   const span = ref<HTMLSpanElement[] | null>(null)
   class LetterManager {
@@ -17,12 +18,18 @@
     }
 
     public placeEntry(x: number, y: number, entry: string) {
+        let charOccurences = entry.split('').reduce((chars, ch) => {chars[ch] = (chars[ch] || 0)+1; return chars}, {} as {[key: string]: number})
+        let lettersToUse = _.mapObject(charOccurences, (count: number, char: string) => {
+            return _.shuffle(this.letterPositionings[char]).slice(0,count);
+        })
+        // TODO: deal with not enough chars
+
         let LETTER_WIDTH = 16
         let startX = x-(entry.length-1)*LETTER_WIDTH/2
         for(let i = 0; i<entry.length; i++) {
             let char = entry[i]
-            let positioning = this.letterPositionings[char][0] // TODO: proper char selection
-            // TODO: deal with not enough chars
+            let positioning = lettersToUse[char][0]
+            lettersToUse[char].shift()
             positioning.addPosition({x, y}, {x: startX+i*LETTER_WIDTH, y})
         }
     }
@@ -124,6 +131,7 @@
     setTimeout(() => {
         letterManager.placeEntry(window.innerWidth/2, window.innerHeight/2, 'AWO')
         letterManager.placeEntry(200, 200, 'BRAVE')
+        letterManager.placeEntry(800, 250, 'ABRAKADABRA')
         letterManager.applyPositions()
     }, 100)
   })
