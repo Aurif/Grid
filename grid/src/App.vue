@@ -71,6 +71,7 @@
     {label: "THIS WEEK"},
     {label: "THIS MONTH", color: '#765c81', mark: 'month'},
     {label: "NEXT 4 MONTHS", color: '#384456', mark: 'quarter'},
+    {label: "GOAL", color: "#ffffff", mark: 'goal'}
   ])
   const cyclicState = new StateCyclic(timeStages.values)
   const headerEntity = anonymousEntity()
