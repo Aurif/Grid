@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { ref, onMounted, onUnmounted, computed } from 'vue'
+    import { computed, onMounted, onUnmounted, ref, type Ref } from 'vue';
     const emit = defineEmits(['onNewEntry'])
     const input = ref<HTMLInputElement | null>(null)
 
@@ -27,8 +27,10 @@
         document.getElementsByTagName('body')[0].removeEventListener("keydown", onInput)
     })
 
-    let props = defineProps(['rows'])
-    let inputHeight = computed(() => window.innerHeight/props.rows*(props.rows % 2 ? 3 : 2))
+    let props = defineProps<{
+        rows: Ref<number>
+    }>()
+    let inputHeight = computed(() => window.innerHeight/props.rows.value*(props.rows.value % 2 ? 3 : 2))
 </script>
 
 <template>
