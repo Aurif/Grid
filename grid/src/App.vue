@@ -8,6 +8,7 @@ import Grid from '@/modules/grid';
 import TimeStages from '@/modules/time-stages';
 import TodoList from '@/modules/todo-list';
 import { ref } from 'vue';
+import DataStoreGist from './common/data/data-store-gist';
 import type { ComponentRef } from './common/types';
 
 
@@ -16,8 +17,8 @@ import type { ComponentRef } from './common/types';
   const _ = 
   ModuleLoader.init()
     .run(Grid, {gridRenderer})
-    .run(TodoList)
-    .run(TimeStages)
+    .run(TodoList, {dataStore: await DataStoreGist.make('grid.json')})
+    .run(TimeStages, {})
     .paramSpace
 
   

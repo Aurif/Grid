@@ -1,12 +1,13 @@
 import { Command } from '@/common/command'
 import { ContextClass, blankContext, type ContextCall } from '@/common/context'
+import type DataStore from '@/common/data/data-store'
 import type Entity from '@/common/entity'
 import type MultiInputProxy from '@/input/multi-input-proxy'
 import InputClickDouble from '@/input/triggers/click-double'
 import ModelScatter from '@/model/model-scatter'
 import type StateDisplay from '@/model/state-display'
 import type { Entry } from '@/model/state-entries'
-import StateEntriesGist from '@/model/state-entries-gist'
+import StateEntries from '@/model/state-entries'
 import GridUpdater from '@/view/grid-updater'
 import type { Ref } from 'vue'
 
@@ -16,7 +17,8 @@ export default function ({
   gridUpdater,
   hideFromGrid,
   columns,
-  rows
+  rows,
+  dataStore
 }: {
   gridInputProxy: MultiInputProxy
   displayState: StateDisplay
@@ -24,11 +26,12 @@ export default function ({
   hideFromGrid: (call: ContextCall, target: Entity) => void
   columns: Ref<number>
   rows: Ref<number>
+  dataStore: DataStore<{ [id: string]: Entry }>
 }) {
   const entryCreationContext = new ContextClass<null>()
   const entryContext = new ContextClass<Entry>()
 
-  const memoryState = new StateEntriesGist([columns, rows], entryContext) //TODO: handle this properly
+  const memoryState = new StateEntries(dataStore, [columns, rows], entryContext) //TODO: handle this properly
   const scatterInputProxy = gridInputProxy.subset().on(InputClickDouble(), (target) => {
     const call = blankContext()
     hideFromGrid(call, target)

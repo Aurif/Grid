@@ -8,9 +8,9 @@ export default class ModuleLoader<T extends {}> {
     return new ModuleLoader({})
   }
 
-  public run<N extends {} | void, E extends {} | undefined>(
+  public run<N extends {} | void, E extends {}>(
     module: (params: T & E) => N,
-    extraParams?: E
+    extraParams: E
   ): ModuleLoader<T & N> {
     return new ModuleLoader({
       ...this.paramSpace,
