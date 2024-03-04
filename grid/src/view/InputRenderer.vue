@@ -1,32 +1,8 @@
 <script setup lang="ts">
-    import { computed, onMounted, onUnmounted, ref, type Ref } from 'vue';
+import ConstantFocusField from '@/components/ConstantFocusField.vue';
+import { computed, type Ref } from 'vue';
+
     const emit = defineEmits(['onNewEntry'])
-    const input = ref<HTMLInputElement | null>(null)
-
-    function refocus() {
-        input.value?.focus();
-        setTimeout(function() { input.value?.focus(); }, 10);
-    }
-    function onInput(event: KeyboardEvent) {
-        if (event.keyCode !== 13) return;
-        event.preventDefault();
-
-        let value = input.value?.value.toUpperCase();
-        input.value!.value = '';
-        if (value) emit('onNewEntry', value);
-    }
-    onMounted(() => {
-        refocus(); 
-        input.value!.addEventListener('blur', refocus);
-        window.addEventListener("focus", refocus)
-        document.getElementsByTagName('body')[0].addEventListener("keydown", onInput)
-    })
-    onUnmounted(() => {
-        input.value!.removeEventListener('blur', refocus)
-        window.removeEventListener("focus", refocus)
-        document.getElementsByTagName('body')[0].removeEventListener("keydown", onInput)
-    })
-
     let props = defineProps<{
         rows: Ref<number>
     }>()
@@ -34,11 +10,13 @@
 </script>
 
 <template>
-    <input :style="{'--input-font-size': inputHeight + 'px'}" ref="input" id="text-input" type="text" auto-focus required>
+    <div class="wrapper">
+        <ConstantFocusField :style="{'--input-font-size': inputHeight + 'px'}" :required="true" @on-input="emit('onNewEntry', $event)" />
+    </div>
 </template>
 
 <style scoped>
-    #text-input {
+    :deep(input) {
         position: fixed;
         left: 0;
         width: 100vw;
@@ -56,7 +34,7 @@
         background-color: #181818;
     }
 
-    #text-input:invalid {
+    :deep(input:invalid) {
         caret-color: transparent;
         color: transparent;
         background-color: transparent;
