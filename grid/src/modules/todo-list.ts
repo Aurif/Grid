@@ -16,8 +16,6 @@ export default function ({
   displayState,
   gridUpdater,
   hideFromGrid,
-  columns,
-  rows,
   dataStore
 }: {
   gridInputProxy: MultiInputProxy
@@ -31,7 +29,11 @@ export default function ({
   const entryCreationContext = new ContextClass<null>()
   const entryContext = new ContextClass<Entry>()
 
-  const memoryState = new StateEntries(dataStore, [columns, rows], entryContext) //TODO: handle this properly
+  const memoryState = new StateEntries(dataStore, entryContext)
+  displayState.reader.watchResize(() => {
+    blankContext()(memoryState.rebroadcast, {})
+  })
+
   const scatterInputProxy = gridInputProxy.subset().on(InputClickDouble(), (target) => {
     const call = blankContext()
     hideFromGrid(call, target)

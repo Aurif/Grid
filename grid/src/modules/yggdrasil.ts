@@ -22,6 +22,9 @@ export default function ({
     ),
     displayState.reader
   )
+  displayState.reader.watchResize(() => {
+    blankContext()(cornerModel.rerender, {})
+  })
 
   setTimeout(() => {
     blankContext()(cornerModel.displayEntry, { entry: 'Hi!' })
