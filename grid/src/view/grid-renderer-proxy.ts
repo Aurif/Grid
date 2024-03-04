@@ -1,14 +1,19 @@
-import GridRenderer from "./GridRenderer.vue"
-import type { ComponentRef } from "@/common/types";
+import type { ComponentRef } from '@/common/types'
+import GridRenderer from './GridRenderer.vue'
 
 export default class GridRendererProxy {
-    source: ComponentRef<typeof GridRenderer>;
+  source: ComponentRef<typeof GridRenderer>
 
-    constructor(bind: ComponentRef<typeof GridRenderer>) {
-        this.source = bind
-    }
+  constructor(bind: ComponentRef<typeof GridRenderer>) {
+    this.source = bind
+  }
 
-    posToChar(x: number, y: number): HTMLSpanElement { return this.source.value.posToChar(x, y) }
-    spanToPos(span: HTMLElement): [number, number] | undefined { return this.source.value.spanToPos(span) }
-
+  posToChar(x: number, y: number): HTMLSpanElement {
+    if (!this.source.value) throw Error('Tried accessing renderer before it is bound')
+    return this.source.value.posToChar(x, y)
+  }
+  spanToPos(span: HTMLElement): [number, number] | undefined {
+    if (!this.source.value) throw Error('Tried accessing renderer before it is bound')
+    return this.source.value.spanToPos(span)
+  }
 }
