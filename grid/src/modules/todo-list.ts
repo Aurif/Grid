@@ -42,9 +42,11 @@ export default function ({
 
   const scatterModel = new ModelScatter(
     Command.combine<{ x: number; y: number; char: string; owner: Entity }>(
+      displayState.setAt.mapArg('owner', ({ owner }) =>
+        owner.withInput(scatterInputProxy.acceptor)
+      ),
       gridUpdater.setChar,
-      gridUpdater.enablePos,
-      displayState.setAt.mapArg('owner', ({ owner }) => owner.withInput(scatterInputProxy.acceptor))
+      gridUpdater.enablePos
     ),
     displayState.reader
   )

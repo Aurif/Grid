@@ -21,10 +21,10 @@ export default function ({
   const cornerDisplayEntity = anonymousEntity()
   const cornerModel = new ModelCorner(
     Command.combine(
+      displayState.setAt.mapArg('owner', () => cornerDisplayEntity),
       gridUpdater.setChar,
       gridUpdater.enablePos,
-      gridUpdater.setColor.mapArg('color', () => '#ffffff'),
-      displayState.setAt.mapArg('owner', () => cornerDisplayEntity)
+      gridUpdater.setColor.mapArg('color', () => '#ffffff')
     ),
     displayState.reader
   )

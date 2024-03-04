@@ -53,9 +53,13 @@ class Context<C> {
   }
 
   public call<A extends CommandArguments>(command: Command<A>, args: A): void {
-    const modifiedCommand = this.getModified(command)
-    if (modifiedCommand)
-      modifiedCommand['callDirect'](this.call.bind(this) as ContextCall, args || {})
+    try {
+      const modifiedCommand = this.getModified(command)
+      if (modifiedCommand)
+        modifiedCommand['callDirect'](this.call.bind(this) as ContextCall, args || {})
+    } catch (e) {
+      console.error(e)
+    }
   }
 }
 

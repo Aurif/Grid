@@ -59,10 +59,10 @@ export default function ({
   )
   const headerModel = new ModelHeader(
     Command.combine(
+      displayState.setAt.mapArg('owner', () => headerEntity),
       gridUpdater.setChar,
       gridUpdater.enablePos,
-      gridUpdater.setColor.mapArg('color', () => cyclicState.reader.getCurrent('color')),
-      displayState.setAt.mapArg('owner', () => headerEntity)
+      gridUpdater.setColor.mapArg('color', () => cyclicState.reader.getCurrent('color'))
     ),
     displayState.reader
   )
