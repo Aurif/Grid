@@ -1,16 +1,22 @@
 import { Command } from '@/common/command'
-import { blankContext } from '@/common/context'
+import { ContextClass, blankContext } from '@/common/context'
 import { anonymousEntity } from '@/common/entity'
 import ModelCorner from '@/model/model-corner'
+import type ModelScatter from '@/model/model-scatter'
 import type StateDisplay from '@/model/state-display'
+import type { Entry } from '@/model/state-entries'
 import type GridUpdater from '@/view/grid-updater'
 
 export default function ({
   displayState,
-  gridUpdater
+  gridUpdater,
+  entryContext,
+  scatterModel
 }: {
   displayState: StateDisplay
   gridUpdater: GridUpdater
+  entryContext: ContextClass<Entry>
+  scatterModel: ModelScatter
 }) {
   const cornerDisplayEntity = anonymousEntity()
   const cornerModel = new ModelCorner(
@@ -26,8 +32,11 @@ export default function ({
     blankContext()(cornerModel.rerender, {})
   })
 
-  setTimeout(() => {
-    blankContext()(cornerModel.displayEntry, { entry: 'Hi!' })
-    blankContext()(cornerModel.displayEntry, { entry: 'Hello!' })
-  }, 1)
+  const cache = new Set()
+  entryContext.registerModifier(scatterModel.displayEntry, (command, context) => {
+    if (context['time-stage'] != 'goal') return command
+    if (cache.has(context.value)) return
+    cache.add(context.value)
+    blankContext()(cornerModel.displayEntry, { entry: context.value })
+  })
 }

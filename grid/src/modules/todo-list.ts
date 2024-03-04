@@ -55,5 +55,5 @@ export default function ({
     call(scatterModel.updateEntry, { eid })
   )
 
-  return { entryContext, entryCreationContext, memoryState }
+  return { entryContext, entryCreationContext, memoryState, scatterModel }
 }
