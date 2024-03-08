@@ -23,7 +23,6 @@
         document.getElementsByTagName('body')[0].addEventListener("keydown", onInput)
     })
     onUnmounted(() => {
-        input.value!.removeEventListener('blur', refocus)
         window.removeEventListener("focus", refocus)
         document.getElementsByTagName('body')[0].removeEventListener("keydown", onInput)
     })

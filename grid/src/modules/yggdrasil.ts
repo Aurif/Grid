@@ -1,24 +1,37 @@
 import { Command } from '@/common/command'
 import { ContextClass, blankContext } from '@/common/context'
 import { anonymousEntity } from '@/common/entity'
+import type MultiInputProxy from '@/input/multi-input-proxy'
+import InputClickDouble from '@/input/triggers/click-double'
 import ModelCorner from '@/model/model-corner'
 import type ModelScatter from '@/model/model-scatter'
 import type StateDisplay from '@/model/state-display'
 import type { Entry } from '@/model/state-entries'
 import type GridUpdater from '@/view/grid-updater'
+import { type Ref } from 'vue'
 
 export default function ({
   displayState,
   gridUpdater,
   entryContext,
-  scatterModel
+  scatterModel,
+  gridInputProxy,
+  pageControl
 }: {
   displayState: StateDisplay
   gridUpdater: GridUpdater
   entryContext: ContextClass<Entry>
   scatterModel: ModelScatter
+  gridInputProxy: MultiInputProxy
+  pageControl: Ref<boolean>
 }) {
   const cornerDisplayEntity = anonymousEntity()
+  cornerDisplayEntity.withInput(
+    gridInputProxy.subset().on(InputClickDouble(), () => {
+      pageControl.value = true
+    }).acceptor
+  )
+
   const cornerModel = new ModelCorner(
     Command.combine(
       displayState.setAt.mapArg('owner', () => cornerDisplayEntity),

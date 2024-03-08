@@ -13,7 +13,7 @@ export default class GridRendererProxy {
     return this.source.value.posToChar(x, y)
   }
   spanToPos(span: HTMLElement): [number, number] | undefined {
-    if (!this.source.value) throw Error('Tried accessing renderer before it is bound')
+    if (!this.source.value) return
     return this.source.value.spanToPos(span)
   }
 }

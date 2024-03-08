@@ -1,34 +1,14 @@
 <script setup lang="ts">
 
-import GridRenderer from './view/GridRenderer.vue';
-import InputRenderer from './view/InputRenderer.vue';
-
-import DataStoreGist from '@/common/data/data-store-gist';
-import ModuleLoader from '@/common/module-loader';
-import type { ComponentRef } from '@/common/types';
-import Grid from '@/modules/grid';
-import TimeStages from '@/modules/time-stages';
-import TodoList from '@/modules/todo-list';
-import Yggdrasil from '@/modules/yggdrasil';
 import { ref } from 'vue';
+import PageGrid from './pages/PageGrid.vue';
 
+  const _ = {pageControl: ref(false)}
 
-  const gridRenderer = ref() as ComponentRef<typeof GridRenderer>
-
-  const _ = 
-  ModuleLoader.init()
-    .run(Grid, {gridRenderer})
-    .run(TodoList, {dataStore: await DataStoreGist.make('grid.json')})
-    .run(TimeStages, {})
-    .run(Yggdrasil, {})
-    .paramSpace
-
-  
 </script>
 
 <template>
-  <GridRenderer :rows="_.rows" :columns="_.columns" :bind="_.gridUpdater" ref="gridRenderer"/>
-  <InputRenderer :rows="_.rows" @onNewEntry="_.entryCreationContext.make(null)(_.memoryState.addEntry, {entry: {value: $event}})"/>
+  <PageGrid v-if="!_.pageControl.value" :pageControl="_.pageControl" />
 </template>
 
 <style>
