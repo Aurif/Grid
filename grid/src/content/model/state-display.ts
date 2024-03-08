@@ -1,6 +1,6 @@
-import { command, enableCommandLogging } from '@/common/command'
-import type { ContextCall } from '@/common/context'
-import type Entity from '@/common/entity'
+import { command, enableCommandLogging } from '@/common/core/command'
+import type { ContextCall } from '@/common/core/context'
+import type Entity from '@/common/core/entity'
 import type { Ref } from 'vue'
 import { watch } from 'vue'
 

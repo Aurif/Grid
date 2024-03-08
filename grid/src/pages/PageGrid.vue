@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
-import GridRenderer from '@/view/GridRenderer.vue';
-import InputRenderer from '@/view/InputRenderer.vue';
+import GridRenderer from '@/content/view/GridRenderer.vue';
+import InputRenderer from '@/content/view/InputRenderer.vue';
 
+import ModuleLoader from '@/common/core/module-loader';
 import DataStoreGist from '@/common/data/data-store-gist';
-import ModuleLoader from '@/common/module-loader';
-import type { ComponentRef } from '@/common/types';
+import type { ComponentRef } from '@/common/utils/types';
 import Grid from '@/modules/grid';
 import TimeStages from '@/modules/time-stages';
 import TodoList from '@/modules/todo-list';

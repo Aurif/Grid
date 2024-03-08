@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
+import PageGrid from '@/pages/PageGrid.vue';
 import { ref } from 'vue';
-import PageGrid from './pages/PageGrid.vue';
 
   const _ = {pageControl: ref(false)}
 

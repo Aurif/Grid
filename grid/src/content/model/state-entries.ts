@@ -1,7 +1,7 @@
-import { command, enableCommandLogging } from '@/common/command'
-import { ContextClass, type ContextCall } from '@/common/context'
+import { command, enableCommandLogging } from '@/common/core/command'
+import { ContextClass, type ContextCall } from '@/common/core/context'
+import Listeners from '@/common/core/listeners'
 import type DataStore from '@/common/data/data-store'
-import Listeners from '@/common/listeners'
 
 export type Entry = { value: string; [key: string]: any }
 export default class StateEntries {

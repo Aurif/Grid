@@ -1,12 +1,12 @@
-import type { ContextCall } from '@/common/context'
-import type Entity from '@/common/entity'
-import type { ComponentRef } from '@/common/types'
-import MultiInputProxy from '@/input/multi-input-proxy'
-import { determinePositioning } from '@/input/positioning'
-import StateDisplay from '@/model/state-display'
-import GridRendererProxy from '@/view/grid-renderer-proxy'
-import GridUpdater from '@/view/grid-updater'
-import GridRenderer from '@/view/GridRenderer.vue'
+import type { ContextCall } from '@/common/core/context'
+import type Entity from '@/common/core/entity'
+import type { ComponentRef } from '@/common/utils/types'
+import MultiInputProxy from '@/content/input/multi-input-proxy'
+import { determinePositioning } from '@/content/input/positioning'
+import StateDisplay from '@/content/model/state-display'
+import GridRenderer from '@/content/view/GridRenderer.vue'
+import GridRendererProxy from '@/content/view/grid-renderer-proxy'
+import GridUpdater from '@/content/view/grid-updater'
 
 export default function ({ gridRenderer }: { gridRenderer: ComponentRef<typeof GridRenderer> }) {
   const { rows, columns } = determinePositioning()

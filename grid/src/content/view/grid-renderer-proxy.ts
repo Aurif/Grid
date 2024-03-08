@@ -1,4 +1,4 @@
-import type { ComponentRef } from '@/common/types'
+import type { ComponentRef } from '@/common/utils/types'
 import GridRenderer from './GridRenderer.vue'
 
 export default class GridRendererProxy {

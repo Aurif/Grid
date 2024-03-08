@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ConstantFocusField from '@/components/ConstantFocusField.vue';
+import ConstantFocusField from '@/common/components/ConstantFocusField.vue';
 import { computed, type Ref } from 'vue';
 
     const emit = defineEmits(['onNewEntry'])
