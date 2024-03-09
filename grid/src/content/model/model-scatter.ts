@@ -4,8 +4,8 @@ import Entity from '@/common/core/entity'
 import type { StateDisplayReader } from './state-display'
 
 export default class ModelScatter {
-  private renderCommand: Command<{ x: number; y: number; char: string; owner: Entity }>
-  private state: StateDisplayReader
+  private readonly renderCommand: Command<{ x: number; y: number; char: string; owner: Entity }>
+  private readonly state: StateDisplayReader
 
   constructor(
     renderCommand: Command<{ x: number; y: number; char: string; owner: Entity }>,

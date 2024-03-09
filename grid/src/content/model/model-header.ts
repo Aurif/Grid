@@ -3,8 +3,8 @@ import { blankContext, type ContextCall } from '@/common/core/context'
 import type { StateDisplayReader } from './state-display'
 
 export default class ModelHeader {
-  private renderCommand: Command<{ x: number; y: number; char: string }>
-  private state: StateDisplayReader
+  private readonly renderCommand: Command<{ x: number; y: number; char: string }>
+  private readonly state: StateDisplayReader
   private content: string = ''
 
   constructor(

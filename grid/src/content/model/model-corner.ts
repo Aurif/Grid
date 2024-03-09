@@ -3,9 +3,9 @@ import { blankContext, type ContextCall } from '@/common/core/context'
 import type { StateDisplayReader } from './state-display'
 
 export default class ModelCorner {
-  private renderCommand: Command<{ x: number; y: number; char: string }>
-  private state: StateDisplayReader
-  private entries: string[] = []
+  private readonly renderCommand: Command<{ x: number; y: number; char: string }>
+  private readonly state: StateDisplayReader
+  private readonly entries: string[] = []
 
   constructor(
     renderCommand: Command<{ x: number; y: number; char: string }>,
