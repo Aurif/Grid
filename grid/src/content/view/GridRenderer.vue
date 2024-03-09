@@ -58,7 +58,6 @@
         --color-active: #eee683;
         color: #ffffff;
         font-size: 30px;
-        font-family: 'Roboto Mono', monospace;
         opacity: 0.1;
         user-select: none;
         width: 16px;

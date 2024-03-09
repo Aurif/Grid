@@ -28,8 +28,6 @@ import { computed, type Ref } from 'vue';
         color: #fffcf6;
         caret-color: #fff2d3;
         text-align: center;
-        text-transform: uppercase;
-        font-family: monospace;
         transition: background-color 0.5s;
         background-color: #181818;
     }

@@ -26,4 +26,9 @@ import PageYggdrasil from './pages/PageYggdrasil.vue';
     height: 100%;
     width: 100%;
   }
+
+  div, input, span {
+    text-transform: uppercase;
+    font-family: 'Roboto Mono', monospace;
+  }
 </style>

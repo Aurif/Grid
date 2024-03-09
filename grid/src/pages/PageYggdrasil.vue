@@ -3,15 +3,22 @@
 import { callOnInit } from '@/common/core/context';
 import type { ComponentRef } from '@/common/utils/types';
 import ModelBranchesCone from '@/content/model/model-branches-cone';
+import HeaderRenderer from '@/content/view/HeaderRenderer.vue';
 import TreeRenderer from '@/content/view/TreeRenderer.vue';
+import HeaderRendererProxy from '@/content/view/header-renderer-proxy';
 import TreeRendererProxy from '@/content/view/tree-renderer-proxy';
 import TreeUpdater from '@/content/view/tree-updater';
 import { ref } from 'vue';
 
   const treeRenderer = ref() as ComponentRef<typeof TreeRenderer>
+  const headerRenderer = ref() as ComponentRef<typeof HeaderRenderer>
+
   const treeRendererProxy = new TreeRendererProxy(treeRenderer)
   const treeUpdater = new TreeUpdater(treeRendererProxy)
   const modelBranches = new ModelBranchesCone(0, 60, "C1", treeUpdater.setNode)
+
+  const headerRendererProxy = new HeaderRendererProxy(headerRenderer)
+  callOnInit(headerRendererProxy.setContent, {content: "uwu"})
 
   const data = {
     '1': { parent: 'C1' },
@@ -30,8 +37,17 @@ import { ref } from 'vue';
 </script>
 
 <template>
-  <TreeRenderer :min-distance="150" ref="treeRenderer"/>
+  <HeaderRenderer ref="headerRenderer"></HeaderRenderer>
+  <div class="treeWrapper">
+    <TreeRenderer :min-distance="150" ref="treeRenderer"/>
+  </div>
 </template>
 
-<style>
+<style scoped>
+  .treeWrapper {
+    height: calc(100% - 8em);
+    width: 100%;
+    position: absolute;
+    top: 8em
+  }
 </style>

@@ -1,16 +1,9 @@
-import type { ComponentRef } from '@/common/utils/types'
+import RendererProxy from '@/common/core/renderer-proxy'
 import type { Ref } from 'vue'
 import type TreeRenderer from './TreeRenderer.vue'
 
-export default class TreeRendererProxy {
-  source: ComponentRef<typeof TreeRenderer>
-
-  constructor(bind: ComponentRef<typeof TreeRenderer>) {
-    this.source = bind
-  }
-
+export default class TreeRendererProxy extends RendererProxy<typeof TreeRenderer> {
   get positions(): Ref<{ [id: string]: { degree: number; layer: number } }> {
-    if (!this.source.value) throw Error('Tried accessing renderer before it is bound')
-    return this.source.value.positions()
+    return this.safeValue.positions()
   }
 }

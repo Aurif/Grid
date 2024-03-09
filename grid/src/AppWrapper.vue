@@ -17,7 +17,6 @@
     text-align: center;
     line-height: 100vh;
     font-size: 8vmin;
-    font-family: 'Roboto Mono', monospace;
     text-shadow: 0 0 4px #2d2b39;
     color: #2d2b39;
   }

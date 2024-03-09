@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { onMounted, ref } from 'vue';
-  import LetterManager from './letter-manager'
-  import TriggerManager from './trigger-manager'
+import LetterManager from './letter-manager';
+import TriggerManager from './trigger-manager';
 
     
   const triggerList = ref<{x: number, y: number, id: string}[]>([])
@@ -53,7 +53,6 @@
         --color-active: #eee683;
         color: #ffffff;
         font-size: 30px;
-        font-family: 'Roboto Mono', monospace;
         opacity: 0.1;
         user-select: none;
         width: 16px;
