@@ -2,6 +2,7 @@
 
 import PageGrid from '@/pages/PageGrid.vue';
 import { ref } from 'vue';
+import PageYggdrasil from './pages/PageYggdrasil.vue';
 
   const _ = {pageControl: ref(false)}
 
@@ -9,6 +10,7 @@ import { ref } from 'vue';
 
 <template>
   <PageGrid v-if="!_.pageControl.value" :pageControl="_.pageControl" />
+  <PageYggdrasil v-if="_.pageControl.value" />
 </template>
 
 <style>

@@ -12,7 +12,7 @@ import TodoList from '@/modules/todo-list';
 import Yggdrasil from '@/modules/yggdrasil';
 import { ref, type Ref } from 'vue';
 
-  let props = defineProps<{ pageControl: Ref<boolean> }>()
+  const props = defineProps<{ pageControl: Ref<boolean> }>()
 
   const gridRenderer = ref() as ComponentRef<typeof GridRenderer>
 
