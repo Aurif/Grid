@@ -3,7 +3,7 @@ import type { ContextCall } from '@/common/core/context'
 import type GridRendererProxy from './grid-renderer-proxy'
 
 export default class GridUpdater {
-  proxy: GridRendererProxy
+  private proxy: GridRendererProxy
   constructor(proxy: GridRendererProxy) {
     this.proxy = proxy
     enableCommandLogging(this)
