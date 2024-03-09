@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-import { ContextClass, blankContext, callOnInit } from '@/common/core/context';
+import { ContextClass, callOnInit } from '@/common/core/context';
 import DataStoreTemporary from '@/common/data/data-store-temporary';
 import type { ComponentRef, Entry } from '@/common/utils/types';
-import InputClick from '@/content/input/triggers/click';
+import NearestElement from '@/content/input/nearest-element';
 import ModelBranchesCone from '@/content/model/model-branches-cone';
 import StateEntries from '@/content/model/state-entries';
 import HeaderRenderer from '@/content/view/HeaderRenderer.vue';
@@ -34,18 +34,26 @@ import { ref } from 'vue';
   const treeRendererProxy = new TreeRendererProxy(treeRenderer)
   const treeUpdater = new TreeUpdater(treeRendererProxy)
   const modelBranches = new ModelBranchesCone(0, 60, "C1", treeUpdater.setNode)
+  callOnInit(modelBranches.render, {data: memoryState.reader.entries})
 
   const headerRendererProxy = new HeaderRendererProxy(headerRenderer)
-  callOnInit(headerRendererProxy.setContent, {content: "uwu"})
-  InputClick().addListener(target => {
+
+  const nearestNode = new NearestElement('svg')
+  nearestNode.onFocused.add((call, {target}) => {
     const eid = treeRendererProxy.elementToId(target)
-    if(!eid) return false
+    if(!eid) return
+
+    call(treeUpdater.focusNode, {nodeId: eid})
     const label = memoryState.reader.get(eid).label
-    blankContext()(headerRendererProxy.setContent, {content: label})
-    return true
+    call(headerRendererProxy.setContent, {content: label})
+  })
+  nearestNode.onUnfocused.add((call, {target}) => {
+    const eid = treeRendererProxy.elementToId(target)
+    if(!eid) return
+
+    call(treeUpdater.unfocusNode, {nodeId: eid})
   })
 
-  callOnInit(modelBranches.render, {data: memoryState.reader.entries})
 </script>
 
 <template>

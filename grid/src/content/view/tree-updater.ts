@@ -14,4 +14,16 @@ export default class TreeUpdater {
       this.proxy.positions.value[id] = { degree, layer }
     }
   )
+
+  focusNode = command((_call: ContextCall, { nodeId }: { nodeId: string }) => {
+    const element = this.proxy.idToElement(nodeId)
+    if (!element) throw Error('Tried to focus non-existent node')
+    element.classList.add('active')
+  })
+
+  unfocusNode = command((_call: ContextCall, { nodeId }: { nodeId: string }) => {
+    const element = this.proxy.idToElement(nodeId)
+    if (!element) throw Error('Tried to focus non-existent node')
+    element.classList.remove('active')
+  })
 }

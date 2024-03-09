@@ -11,4 +11,8 @@ export default class TreeRendererProxy extends RendererProxy<typeof TreeRenderer
     if (!this.source.value) return
     return this.source.value.elementToId(span)
   }
+
+  idToElement(nodeId: string): HTMLElement | undefined {
+    return this.safeValue.idToElement(nodeId)
+  }
 }
