@@ -84,7 +84,7 @@ export default class StateDisplay {
     }
   )
 
-  get reader() {
+  get reader(): StateDisplayReader {
     return new StateDisplayReader(this)
   }
 }

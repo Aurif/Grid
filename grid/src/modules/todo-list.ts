@@ -2,11 +2,11 @@ import { Command } from '@/common/core/command'
 import { ContextClass, blankContext, type ContextCall } from '@/common/core/context'
 import type Entity from '@/common/core/entity'
 import type DataStore from '@/common/data/data-store'
+import type { Entry } from '@/common/utils/types'
 import type MultiInputProxy from '@/content/input/multi-input-proxy'
 import InputClickDouble from '@/content/input/triggers/click-double'
 import ModelScatter from '@/content/model/model-scatter'
 import type StateDisplay from '@/content/model/state-display'
-import type { Entry } from '@/content/model/state-entries'
 import StateEntries from '@/content/model/state-entries'
 import GridUpdater from '@/content/view/grid-updater'
 import type { Ref } from 'vue'
@@ -24,12 +24,12 @@ export default function ({
   hideFromGrid: (call: ContextCall, target: Entity) => void
   columns: Ref<number>
   rows: Ref<number>
-  dataStore: DataStore<{ [id: string]: Entry }>
+  dataStore: DataStore<{ [id: string]: Entry<{ value: string }> }>
 }) {
   const entryCreationContext = new ContextClass<null>()
-  const entryContext = new ContextClass<Entry>()
+  const entryContext = new ContextClass<Entry<{ value: string }>>()
 
-  const memoryState = new StateEntries(dataStore, entryContext)
+  const memoryState = new StateEntries<{ value: string }>(dataStore, entryContext)
   displayState.reader.watchResize(() => {
     blankContext()(memoryState.rebroadcast, {})
   })

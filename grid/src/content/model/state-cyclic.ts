@@ -22,7 +22,7 @@ export class StateCyclic<T extends {}> {
     this.listeners.emit(call, { value: { ...this.values[this.index] } })
   })
 
-  get reader() {
+  get reader(): StateCyclicReader<T> {
     return new StateCyclicReader(this)
   }
 }
