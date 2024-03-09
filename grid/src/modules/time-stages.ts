@@ -2,6 +2,7 @@ import { Command } from '@/common/core/command'
 import { ContextClass, blankContext, callOnInit, type ContextCall } from '@/common/core/context'
 import Entity, { anonymousEntity } from '@/common/core/entity'
 import PresetUtil from '@/common/utils/preset-util'
+import type { Entry } from '@/common/utils/types'
 import type MultiInputProxy from '@/content/input/multi-input-proxy'
 import InputClick from '@/content/input/triggers/click'
 import InputClickDouble from '@/content/input/triggers/click-double'
@@ -12,7 +13,6 @@ import ModelHeader from '@/content/model/model-header'
 import { StateCyclic } from '@/content/model/state-cyclic'
 import type StateDisplay from '@/content/model/state-display'
 import type StateEntries from '@/content/model/state-entries'
-import type { Entry } from '@/content/model/state-entries'
 import GridUpdater from '@/content/view/grid-updater'
 
 export default function ({
@@ -28,8 +28,8 @@ export default function ({
   gridUpdater: GridUpdater
   displayState: StateDisplay
   entryCreationContext: ContextClass<null>
-  entryContext: ContextClass<Entry>
-  memoryState: StateEntries
+  entryContext: ContextClass<Entry<{ value: string }>>
+  memoryState: StateEntries<{ value: string }>
   hideFromGrid: (call: ContextCall, target: Entity) => void
 }) {
   const timeStages = new PresetUtil([

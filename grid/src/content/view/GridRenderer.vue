@@ -1,10 +1,12 @@
 <script setup lang="ts">
-    import { ref, watch, type Ref } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
+import { ref, watch, type Ref } from 'vue';
+
     const props = defineProps<{
         rows: Ref<number>, 
         columns: Ref<number>
     }>()
-    let uid = Date.now()
+    let uid: string = uuidv4()
 
     const chars = ref<{[id: string]: HTMLSpanElement}>({})
     let stateId = 0
@@ -20,7 +22,7 @@
         return chars.value[x+':'+y]
     }
     function spanToPos(span: HTMLElement): [number, number] | undefined {
-        if (span.getAttribute("container-uid") != ''+uid) return
+        if (span.getAttribute("container-uid") != uid) return
         let posX = span.getAttribute("pos-x")
         let posY = span.getAttribute("pos-y")
         if (posX == null || posY == null) throw new Error("Corrupted grid element "+span)

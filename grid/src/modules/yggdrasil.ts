@@ -1,12 +1,12 @@
 import { Command } from '@/common/core/command'
 import { ContextClass, blankContext } from '@/common/core/context'
 import { anonymousEntity } from '@/common/core/entity'
+import type { Entry } from '@/common/utils/types'
 import type MultiInputProxy from '@/content/input/multi-input-proxy'
 import InputClickDouble from '@/content/input/triggers/click-double'
 import ModelCorner from '@/content/model/model-corner'
 import type ModelScatter from '@/content/model/model-scatter'
 import type StateDisplay from '@/content/model/state-display'
-import type { Entry } from '@/content/model/state-entries'
 import type GridUpdater from '@/content/view/grid-updater'
 import { type Ref } from 'vue'
 
@@ -20,7 +20,7 @@ export default function ({
 }: {
   displayState: StateDisplay
   gridUpdater: GridUpdater
-  entryContext: ContextClass<Entry>
+  entryContext: ContextClass<Entry<{ value: string }>>
   scatterModel: ModelScatter
   gridInputProxy: MultiInputProxy
   pageControl: Ref<boolean>

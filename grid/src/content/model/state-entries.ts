@@ -69,4 +69,8 @@ export class StateEntriesReader<E extends {}> {
   get entries() {
     return { ...this.state['entries'] }
   }
+
+  get(eid: string) {
+    return this.entries[eid]
+  }
 }

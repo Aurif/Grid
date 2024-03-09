@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
-import { ContextClass, callOnInit } from '@/common/core/context';
+import { ContextClass, blankContext, callOnInit } from '@/common/core/context';
 import DataStoreTemporary from '@/common/data/data-store-temporary';
 import type { ComponentRef, Entry } from '@/common/utils/types';
+import InputClick from '@/content/input/triggers/click';
 import ModelBranchesCone from '@/content/model/model-branches-cone';
 import StateEntries from '@/content/model/state-entries';
 import HeaderRenderer from '@/content/view/HeaderRenderer.vue';
@@ -17,16 +18,16 @@ import { ref } from 'vue';
 
   const entryContext = new ContextClass<Entry<{ parent: string, label: string }>>()
   const dataStore = new DataStoreTemporary({
-    '1': { label: '1', parent: 'C1' },
-    '2': { label: '2', parent: 'C1' },
-    '3': { label: '3', parent: 'C1' },
-    '4': { label: '4', parent: '3' },
-    '5': { label: '5', parent: '3' },
-    '6': { label: '6', parent: '2' },
-    '7': { label: '7', parent: '6' },
-    '8': { label: '8', parent: '6' },
-    '9': { label: '9', parent: '3' },
-    '0': { label: '0', parent: '3' }
+    '1': { label: 'L-1', parent: 'C1' },
+    '2': { label: 'L-2', parent: 'C1' },
+    '3': { label: 'L-3', parent: 'C1' },
+    '4': { label: 'L-4', parent: '3' },
+    '5': { label: 'L-5', parent: '3' },
+    '6': { label: 'L-6', parent: '2' },
+    '7': { label: 'L-7', parent: '6' },
+    '8': { label: 'L-8', parent: '6' },
+    '9': { label: 'L-9', parent: '3' },
+    '0': { label: 'L-0', parent: '3' }
   })
   const memoryState = new StateEntries<{ parent: string, label: string }>(dataStore, entryContext)
 
@@ -36,6 +37,13 @@ import { ref } from 'vue';
 
   const headerRendererProxy = new HeaderRendererProxy(headerRenderer)
   callOnInit(headerRendererProxy.setContent, {content: "uwu"})
+  InputClick().addListener(target => {
+    const eid = treeRendererProxy.elementToId(target)
+    if(!eid) return false
+    const label = memoryState.reader.get(eid).label
+    blankContext()(headerRendererProxy.setContent, {content: label})
+    return true
+  })
 
   callOnInit(modelBranches.render, {data: memoryState.reader.entries})
 </script>
