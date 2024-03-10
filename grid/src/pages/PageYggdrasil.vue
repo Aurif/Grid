@@ -6,11 +6,11 @@ import type { ComponentRef, Entry } from '@/common/utils/types';
 import NearestElement from '@/content/input/nearest-element';
 import ModelBranchesCone from '@/content/model/model-branches-cone';
 import StateEntries from '@/content/model/state-entries';
-import HeaderRenderer from '@/content/view/HeaderRenderer.vue';
-import TreeRenderer from '@/content/view/TreeRenderer.vue';
-import HeaderRendererProxy from '@/content/view/header-renderer-proxy';
-import TreeRendererProxy from '@/content/view/tree-renderer-proxy';
-import TreeUpdater from '@/content/view/tree-updater';
+import HeaderRenderer from '@/content/view/header/HeaderRenderer.vue';
+import HeaderRendererProxy from '@/content/view/header/header-renderer-proxy';
+import TreeRenderer from '@/content/view/tree/TreeRenderer.vue';
+import TreeRendererProxy from '@/content/view/tree/tree-renderer-proxy';
+import TreeUpdater from '@/content/view/tree/tree-updater';
 import { ref } from 'vue';
 
   const treeRenderer = ref() as ComponentRef<typeof TreeRenderer>
@@ -70,4 +70,4 @@ import { ref } from 'vue';
     position: absolute;
     top: 8em
   }
-</style>
+</style>@/content/view/header/header-renderer-proxy@/content/view/tree/tree-renderer-proxy@/content/view/tree/tree-updater

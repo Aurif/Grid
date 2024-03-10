@@ -57,4 +57,8 @@ import { computed, ref } from 'vue';
     .active {
         opacity: 1;
     }
+
+    .active circle {
+        stroke-width: 8px;
+    }
 </style>

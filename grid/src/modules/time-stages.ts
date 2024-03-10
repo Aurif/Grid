@@ -13,7 +13,7 @@ import ModelHeader from '@/content/model/model-header'
 import { StateCyclic } from '@/content/model/state-cyclic'
 import type StateDisplay from '@/content/model/state-display'
 import type StateEntries from '@/content/model/state-entries'
-import GridUpdater from '@/content/view/grid-updater'
+import GridUpdater from '@/content/view/grid/grid-updater'
 
 export default function ({
   gridInputProxy,

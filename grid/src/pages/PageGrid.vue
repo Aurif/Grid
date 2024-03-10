@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import GridRenderer from '@/content/view/GridRenderer.vue';
+import GridRenderer from '@/content/view/grid/GridRenderer.vue';
 import InputRenderer from '@/content/view/InputRenderer.vue';
 
 import ModuleLoader from '@/common/core/module-loader';

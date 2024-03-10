@@ -4,9 +4,9 @@ import type { ComponentRef } from '@/common/utils/types'
 import MultiInputProxy from '@/content/input/multi-input-proxy'
 import { determinePositioning } from '@/content/input/positioning'
 import StateDisplay from '@/content/model/state-display'
-import GridRenderer from '@/content/view/GridRenderer.vue'
-import GridRendererProxy from '@/content/view/grid-renderer-proxy'
-import GridUpdater from '@/content/view/grid-updater'
+import GridRenderer from '@/content/view/grid/GridRenderer.vue'
+import GridRendererProxy from '@/content/view/grid/grid-renderer-proxy'
+import GridUpdater from '@/content/view/grid/grid-updater'
 
 export default function ({ gridRenderer }: { gridRenderer: ComponentRef<typeof GridRenderer> }) {
   const { rows, columns } = determinePositioning()

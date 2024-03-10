@@ -7,7 +7,7 @@ import InputClickDouble from '@/content/input/triggers/click-double'
 import ModelCorner from '@/content/model/model-corner'
 import type ModelScatter from '@/content/model/model-scatter'
 import type StateDisplay from '@/content/model/state-display'
-import type GridUpdater from '@/content/view/grid-updater'
+import type GridUpdater from '@/content/view/grid/grid-updater'
 import { type Ref } from 'vue'
 
 export default function ({
