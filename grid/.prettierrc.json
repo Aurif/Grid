@@ -4,5 +4,18 @@
   "tabWidth": 2,
   "singleQuote": true,
   "printWidth": 100,
-  "trailingComma": "none"
+  "trailingComma": "none",
+  "overrides": [
+    {
+      "files": [
+        "*.vue"
+      ],
+      "options": {
+        "vueIndentScriptAndStyle": true
+      }
+    }
+  ],
+  "plugins": [
+    "prettier-plugin-organize-imports"
+  ]
 }

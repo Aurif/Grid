@@ -1,11 +1,9 @@
-<script setup lang="ts">
+<script lang="ts" setup>
+  import PageGrid from '@/pages/PageGrid.vue'
+  import PageYggdrasil from '@/pages/PageYggdrasil.vue'
+  import { ref } from 'vue'
 
-import PageGrid from '@/pages/PageGrid.vue';
-import { ref } from 'vue';
-import PageYggdrasil from './pages/PageYggdrasil.vue';
-
-  const _ = {pageControl: ref(false)}
-
+  const _ = { pageControl: ref(false) }
 </script>
 
 <template>
@@ -27,7 +25,9 @@ import PageYggdrasil from './pages/PageYggdrasil.vue';
     width: 100%;
   }
 
-  div, input, span {
+  div,
+  input,
+  span {
     text-transform: uppercase;
     font-family: 'Roboto Mono', monospace;
   }

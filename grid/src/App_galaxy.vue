@@ -1,14 +1,14 @@
-<script setup lang="ts">
-import { determinePositioning } from '@/content/input/positioning';
-import GalaxyRenderer from '@/content/view/galaxy/GalaxyRenderer.vue';
-import InputRenderer from '@/content/view/InputRenderer.vue';
+<script lang="ts" setup>
+  import { determinePositioning } from '@/content/input/positioning'
+  import GalaxyRenderer from '@/content/view/galaxy/GalaxyRenderer.vue'
+  import InputGlobalRenderer from '@/content/view/InputGlobalRenderer.vue'
 
   const _ = determinePositioning()
 </script>
 
 <template>
-  <GalaxyRenderer/>
-  <InputRenderer :rows="_.rows"/>
+  <GalaxyRenderer />
+  <InputGlobalRenderer :rows="_.rows" />
 </template>
 
 <style>
