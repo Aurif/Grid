@@ -2,20 +2,25 @@
   import { ContextClass, blankContext, callOnInit } from '@/common/core/context'
   import DataStoreTemporary from '@/common/data/data-store-temporary'
   import type { ComponentRef, Entry } from '@/common/utils/types'
+  import MouseAngle from '@/content/input/mouse-angle'
   import NearestElement from '@/content/input/nearest-element'
   import ModelBranchesCone from '@/content/model/model-branches-cone'
   import StateEntries from '@/content/model/state-entries'
   import InputUnderMouseRenderer from '@/content/view/InputUnderMouseRenderer.vue'
-  import MenuCircularRenderer from '@/content/view/MenuCircularRenderer.vue'
   import HeaderRenderer from '@/content/view/header/HeaderRenderer.vue'
   import HeaderRendererProxy from '@/content/view/header/header-renderer-proxy'
+  import MenuCircularRenderer from '@/content/view/menu-circular/MenuCircularRenderer.vue'
+  import MenuCircularRendererProxy from '@/content/view/menu-circular/menu-circular-renderer-proxy'
+  import MenuCircularUpdater from '@/content/view/menu-circular/menu-circular-updater'
   import TreeRenderer from '@/content/view/tree/TreeRenderer.vue'
   import TreeRendererProxy from '@/content/view/tree/tree-renderer-proxy'
   import TreeUpdater from '@/content/view/tree/tree-updater'
-  import { ref } from 'vue'
+  import { ref, type Ref } from 'vue'
 
   const treeRenderer = ref() as ComponentRef<typeof TreeRenderer>
   const headerRenderer = ref() as ComponentRef<typeof HeaderRenderer>
+  const menuRenderer = ref() as ComponentRef<typeof MenuCircularRenderer>
+  const menuWrapper = ref() as Ref<HTMLElement>
 
   const entryContext = new ContextClass<Entry<{ parent: string; label: string }>>()
   const dataStore = new DataStoreTemporary({
@@ -47,6 +52,12 @@
     callOnInit(modelBranches.render, { data: memoryState.reader.entries })
     memoryState.onUpdateData.add(modelBranches.render)
   }
+
+  const circularMenuRendererProxy = new MenuCircularRendererProxy(menuRenderer)
+  const circularMenuUpdater = new MenuCircularUpdater(circularMenuRendererProxy)
+  const circularMenuInput = new MouseAngle(menuWrapper, segments)
+  circularMenuInput.onSelected.add(circularMenuUpdater.enableArc)
+  circularMenuInput.onUnselected.add(circularMenuUpdater.disableArc)
 
   const headerRendererProxy = new HeaderRendererProxy(headerRenderer)
 
@@ -80,8 +91,8 @@
   <HeaderRenderer ref="headerRenderer"></HeaderRenderer>
   <div class="treeWrapper">
     <TreeRenderer ref="treeRenderer" :min-distance="200" />
-    <div class="menuWrapper">
-      <MenuCircularRenderer :segments="segments" />
+    <div ref="menuWrapper" class="menuWrapper">
+      <MenuCircularRenderer ref="menuRenderer" :segments="segments" />
     </div>
   </div>
   <InputUnderMouseRenderer @onNewEntry="newNode" />
