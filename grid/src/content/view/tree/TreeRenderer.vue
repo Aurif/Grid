@@ -26,8 +26,11 @@
 </script>
 
 <template>
-  <div :style="{ '--layer-size': `calc((50vmin - ${props.minDistance}px)/${maxLayer + 1})` }">
-    <svg
+  <svg
+    :style="{ '--layer-size': `calc((50vmin - ${props.minDistance}px)/${maxLayer + 1})` }"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
       v-for="(pos, id) in positions"
       :key="id"
       :ref="(el) => (nodes[id] = el as HTMLElement)"
@@ -36,34 +39,31 @@
       :style="{
         transform: `rotate(${pos.degree}deg) translateY(calc(${-props.minDistance}px - var(--layer-size) * ${pos.layer}))`
       }"
-      viewBox="0 0 100 100"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="50" cy="50" r="20" />
-    </svg>
-  </div>
+      cx="50%"
+      cy="50%"
+      r="7"
+    />
+  </svg>
 </template>
 
 <style scoped>
   svg {
-    width: 32px;
-    position: absolute;
     left: calc(50% - 16px);
     top: calc(50% - 16px);
-    opacity: 0.45;
+    width: 100%;
+    height: 100%;
   }
 
   circle {
     fill: transparent;
     stroke: white;
-    stroke-width: 5px;
+    stroke-width: 2px;
+    opacity: 0.45;
+    transform-origin: 50% 50%;
   }
 
   .active {
     opacity: 1;
-  }
-
-  .active circle {
-    stroke-width: 8px;
+    stroke-width: 3px;
   }
 </style>

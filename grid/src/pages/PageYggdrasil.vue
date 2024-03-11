@@ -62,7 +62,7 @@
 
   const headerRendererProxy = new HeaderRendererProxy(headerRenderer)
 
-  const nearestNode = new NearestElement('svg')
+  const nearestNode = new NearestElement('circle, .menuWrapper')
   nearestNode.onFocused.add((call, { target }) => {
     const eid = treeRendererProxy.elementToId(target)
     menuFocused = !eid
