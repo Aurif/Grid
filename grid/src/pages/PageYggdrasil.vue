@@ -111,7 +111,7 @@
 <template>
   <HeaderRenderer ref="headerRenderer"></HeaderRenderer>
   <div class="treeWrapper">
-    <TreeRenderer ref="treeRenderer" :min-distance="200" />
+    <TreeRenderer ref="treeRenderer" :min-distance="170" />
     <div ref="menuWrapper" class="menuWrapper">
       <MenuCircularRenderer ref="menuRenderer" :segments="segments" />
     </div>

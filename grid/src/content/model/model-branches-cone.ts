@@ -1,5 +1,6 @@
 import { command, enableCommandLogging, type Command } from '@/common/core/command'
 import { type ContextCall } from '@/common/core/context'
+import seededRandom from '@/common/utils/seeded-random'
 import { sum } from 'lodash'
 
 export default class ModelBranchesCone {
@@ -7,6 +8,17 @@ export default class ModelBranchesCone {
   private readonly maxDegree: number
   private readonly root: string
   private readonly renderCommand: Command<{ id: string; degree: number; layer: number }>
+  render = command(
+    (call: ContextCall, { data }: { data: { [id: string]: { parent: string } } }) => {
+      const tree = new Branch(this.root, new ParsedTreeStructure(data))
+      const positions = tree.makePositions(this.minDegree, this.maxDegree, -1)
+      for (const id in positions) {
+        if (id == this.root) continue
+        const node = positions[id]
+        call(this.renderCommand, { id, degree: node.degree, layer: node.layer })
+      }
+    }
+  )
 
   constructor(
     minDegree: number,
@@ -20,26 +32,19 @@ export default class ModelBranchesCone {
     this.renderCommand = renderCommand
     enableCommandLogging(this)
   }
-
-  render = command(
-    (call: ContextCall, { data }: { data: { [id: string]: { parent: string } } }) => {
-      const tree = new Branch(this.root, new ParsedTreeStructure(data))
-      const positions = tree.makePositions(this.minDegree, this.maxDegree, -1)
-      for (const id in positions) {
-        if (id == this.root) continue
-        const node = positions[id]
-        call(this.renderCommand, { id, degree: node.degree, layer: node.layer })
-      }
-    }
-  )
 }
 
 class ParsedTreeStructure {
   private rawNodes: { [id: string]: { parent: string } }
   private childrenMapping: { [id: string]: string[] } = {}
+
   constructor(rawNodes: { [id: string]: { parent: string } }) {
     this.rawNodes = rawNodes
     this.buildChildrenMapping()
+  }
+
+  public getChildren(nodeId: string): string[] {
+    return this.childrenMapping[nodeId] || []
   }
 
   private buildChildrenMapping() {
@@ -49,24 +54,25 @@ class ParsedTreeStructure {
       this.childrenMapping[parentId].push(nodeId)
     }
   }
-
-  public getChildren(nodeId: string): string[] {
-    return this.childrenMapping[nodeId] || []
-  }
 }
 
 class Branch {
   private rootId: string
   private subbranches: Branch[]
+  private cachedPriority?: number
+  private cachedDepth?: number
+
   constructor(rootId: string, treeStructure: ParsedTreeStructure) {
     this.rootId = rootId
     this.subbranches = treeStructure.getChildren(rootId).map((id) => new Branch(id, treeStructure))
   }
 
-  private cachedPriority?: number
   public calculatePriority(): number {
     if (!this.cachedPriority)
-      this.cachedPriority = Math.max(1, sum(this.subbranches.map((x) => x.calculatePriority())) / 2)
+      this.cachedPriority = Math.max(
+        1,
+        sum(this.subbranches.map((x) => x.calculatePriority())) / 1.6
+      )
     return this.cachedPriority
   }
 
@@ -85,16 +91,24 @@ class Branch {
     let sliceUsed = 0
     for (const subbranch of this.subbranches) {
       const thisSlice = subbranch.calculatePriority()
+      const maxLayerIncrease = Math.min(1.15, (3 - layer) / subbranch.calculateDepth())
+      const rand = seededRandom(subbranch.rootId)
       positions = {
         ...positions,
         ...subbranch.makePositions(
           minDegree + sliceWidth * sliceUsed,
           minDegree + sliceWidth * (sliceUsed + thisSlice),
-          layer + 1
+          layer < 0 ? rand() * 0.3 : layer + maxLayerIncrease * (0.2 + rand() * 0.8)
         )
       }
       sliceUsed += thisSlice
     }
     return positions
+  }
+
+  public calculateDepth(): number {
+    if (!this.cachedDepth)
+      this.cachedDepth = Math.max(0, ...this.subbranches.map((x) => x.calculateDepth())) + 1
+    return this.cachedDepth
   }
 }
