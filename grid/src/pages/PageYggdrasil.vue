@@ -6,6 +6,7 @@
   import ModelBranchesCone from '@/content/model/model-branches-cone'
   import StateEntries from '@/content/model/state-entries'
   import InputUnderMouseRenderer from '@/content/view/InputUnderMouseRenderer.vue'
+  import MenuCircularRenderer from '@/content/view/MenuCircularRenderer.vue'
   import HeaderRenderer from '@/content/view/header/HeaderRenderer.vue'
   import HeaderRendererProxy from '@/content/view/header/header-renderer-proxy'
   import TreeRenderer from '@/content/view/tree/TreeRenderer.vue'
@@ -21,6 +22,7 @@
     '1': { label: 'L-1', parent: 'C1' },
     '2': { label: 'L-2', parent: 'C1' },
     '3': { label: 'L-3', parent: 'C1' },
+    c: { label: 'L-3', parent: 'C2' },
     '4': { label: 'L-4', parent: '3' },
     '5': { label: 'L-5', parent: '3' },
     '6': { label: 'L-6', parent: '2' },
@@ -33,9 +35,18 @@
 
   const treeRendererProxy = new TreeRendererProxy(treeRenderer)
   const treeUpdater = new TreeUpdater(treeRendererProxy)
-  const modelBranches = new ModelBranchesCone(0, 60, 'C1', treeUpdater.setNode)
-  callOnInit(modelBranches.render, { data: memoryState.reader.entries })
-  memoryState.onUpdateData.add(modelBranches.render)
+
+  const segments = 6
+  for (let i = 0; i < segments; i++) {
+    const modelBranches = new ModelBranchesCone(
+      (360 / segments) * (i - 0.5) + 18 / segments,
+      (360 / segments) * (i + 0.5) - 18 / segments,
+      'C' + i,
+      treeUpdater.setNode
+    )
+    callOnInit(modelBranches.render, { data: memoryState.reader.entries })
+    memoryState.onUpdateData.add(modelBranches.render)
+  }
 
   const headerRendererProxy = new HeaderRendererProxy(headerRenderer)
 
@@ -68,7 +79,10 @@
 <template>
   <HeaderRenderer ref="headerRenderer"></HeaderRenderer>
   <div class="treeWrapper">
-    <TreeRenderer ref="treeRenderer" :min-distance="150" />
+    <TreeRenderer ref="treeRenderer" :min-distance="200" />
+    <div class="menuWrapper">
+      <MenuCircularRenderer :segments="segments" />
+    </div>
   </div>
   <InputUnderMouseRenderer @onNewEntry="newNode" />
 </template>
@@ -79,5 +93,14 @@
     width: 100%;
     position: absolute;
     top: 8em;
+  }
+
+  .menuWrapper {
+    --size: 320px;
+    width: var(--size);
+    height: var(--size);
+    position: absolute;
+    top: calc(50% - var(--size) / 2);
+    left: calc(50% - var(--size) / 2);
   }
 </style>
