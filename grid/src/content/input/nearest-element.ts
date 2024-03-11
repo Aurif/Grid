@@ -39,7 +39,10 @@ export default class NearestElement {
       const elX = rect.left + rect.width / 2
       const elY = rect.top + rect.height / 2
 
-      const distance = Math.pow(x - elX, 2) + Math.pow(y - elY, 2)
+      const distance =
+        Math.pow(x - elX, 2) +
+        Math.pow(y - elY, 2) -
+        Math.pow(Math.max(rect.width, rect.height) / 2, 2)
       if (distance < minDistance) {
         minDistance = distance
         nearestElement = element as HTMLElement
