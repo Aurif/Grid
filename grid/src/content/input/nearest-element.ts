@@ -3,14 +3,19 @@ import Listeners from '@/common/core/listeners'
 import { onMounted, onUnmounted } from 'vue'
 
 export default class NearestElement {
-  private readonly query: string
   public readonly onFocused = new Listeners<{ target: HTMLElement }>()
   public readonly onUnfocused = new Listeners<{ target: HTMLElement }>()
+  private readonly query: string
   private focusedElement?: HTMLElement
+
   constructor(query: string) {
     this.query = query
     onMounted(() => window.addEventListener('mousemove', this.onMove.bind(this)))
     onUnmounted(() => window.removeEventListener('mousemove', this.onMove.bind(this)))
+  }
+
+  public get currentNearestElement(): HTMLElement | undefined {
+    return this.focusedElement
   }
 
   private onMove(event: MouseEvent) {

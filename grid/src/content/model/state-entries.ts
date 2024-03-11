@@ -1,14 +1,40 @@
 import { command, enableCommandLogging } from '@/common/core/command'
-import { ContextClass, type ContextCall } from '@/common/core/context'
+import { ContextClass, blankContext, type ContextCall } from '@/common/core/context'
 import Listeners from '@/common/core/listeners'
 import type DataStore from '@/common/data/data-store'
 import type { Entry } from '@/common/utils/types'
 
 export default class StateEntries<E extends {}> {
-  private readonly entries: { [id: string]: Entry<E> }
   public readonly onNewEntry = new Listeners<{ entry: Entry<E>; eid: string }>()
   public readonly onUpdateEntry = new Listeners<{ entry: Entry<E>; eid: string }>()
+  public readonly onUpdateData = new Listeners<{ data: { [id: string]: Entry<E> } }>()
+  rebroadcast = command(() => {
+    this.fullListenerBroadcast(this.onNewEntry.emit.bind(this.onNewEntry))
+  })
+  
+  private readonly entries: { [id: string]: Entry<E> }
+  removeEntry = command((_call: ContextCall, { eid }: { eid: string }) => {
+    if (!this.entries[eid]) throw Error('Tried removing non-existent entry ' + eid)
+    delete this.entries[eid]
+    this.onUpdateData.emit(blankContext(), { data: { ...this.entries } })
+  })
+
   private readonly contextClass: ContextClass<Entry<E>>
+  addEntry = command((_call: ContextCall, { entry }: { entry: Entry<E> }) => {
+    const eid = '' + Date.now()
+    this.entries[eid] = entry
+    const newCall = this.contextClass.make({ ...entry })
+    this.onNewEntry.emit(newCall, { entry, eid })
+    this.onUpdateData.emit(newCall, { data: { ...this.entries } })
+  })
+
+  updateEntry = command((_call: ContextCall, { entry, eid }: { entry: Entry<E>; eid: string }) => {
+    if (!this.entries[eid]) throw new Error('Tried updating non-existent entry')
+    this.entries[eid] = entry
+    const newCall = this.contextClass.make({ ...entry })
+    this.onUpdateEntry.emit(newCall, { entry, eid })
+    this.onUpdateData.emit(newCall, { data: { ...this.entries } })
+  })
 
   constructor(
     dataStore: DataStore<{ [id: string]: Entry<E> }>,
@@ -22,6 +48,10 @@ export default class StateEntries<E extends {}> {
     enableCommandLogging(this)
   }
 
+  get reader(): StateEntriesReader<E> {
+    return new StateEntriesReader(this)
+  }
+
   fullListenerBroadcast(
     broadcast: (call: ContextCall, data: { entry: Entry<E>; eid: string }) => void
   ) {
@@ -29,33 +59,6 @@ export default class StateEntries<E extends {}> {
       const call = this.contextClass.make({ ...this.entries[eid] })
       broadcast(call, { entry: this.entries[eid], eid })
     }
-  }
-
-  addEntry = command((_call: ContextCall, { entry }: { entry: Entry<E> }) => {
-    const eid = '' + Date.now()
-    this.entries[eid] = entry
-    const newCall = this.contextClass.make({ ...entry })
-    this.onNewEntry.emit(newCall, { entry, eid })
-  })
-
-  updateEntry = command((_call: ContextCall, { entry, eid }: { entry: Entry<E>; eid: string }) => {
-    if (!this.entries[eid]) throw new Error('Tried updating non-existent entry')
-    this.entries[eid] = entry
-    const newCall = this.contextClass.make({ ...entry })
-    this.onUpdateEntry.emit(newCall, { entry, eid })
-  })
-
-  removeEntry = command((_call: ContextCall, { eid }: { eid: string }) => {
-    if (!this.entries[eid]) throw Error('Tried removing non-existent entry ' + eid)
-    delete this.entries[eid]
-  })
-
-  rebroadcast = command(() => {
-    this.fullListenerBroadcast(this.onNewEntry.emit.bind(this.onNewEntry))
-  })
-
-  get reader(): StateEntriesReader<E> {
-    return new StateEntriesReader(this)
   }
 }
 

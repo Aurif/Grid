@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-  import { ContextClass, callOnInit } from '@/common/core/context'
+  import { ContextClass, blankContext, callOnInit } from '@/common/core/context'
   import DataStoreTemporary from '@/common/data/data-store-temporary'
   import type { ComponentRef, Entry } from '@/common/utils/types'
   import NearestElement from '@/content/input/nearest-element'
   import ModelBranchesCone from '@/content/model/model-branches-cone'
   import StateEntries from '@/content/model/state-entries'
+  import InputUnderMouseRenderer from '@/content/view/InputUnderMouseRenderer.vue'
   import HeaderRenderer from '@/content/view/header/HeaderRenderer.vue'
   import HeaderRendererProxy from '@/content/view/header/header-renderer-proxy'
   import TreeRenderer from '@/content/view/tree/TreeRenderer.vue'
   import TreeRendererProxy from '@/content/view/tree/tree-renderer-proxy'
   import TreeUpdater from '@/content/view/tree/tree-updater'
   import { ref } from 'vue'
-  import InputUnderMouseRenderer from '@/content/view/InputUnderMouseRenderer.vue'
 
   const treeRenderer = ref() as ComponentRef<typeof TreeRenderer>
   const headerRenderer = ref() as ComponentRef<typeof HeaderRenderer>
@@ -35,6 +35,7 @@
   const treeUpdater = new TreeUpdater(treeRendererProxy)
   const modelBranches = new ModelBranchesCone(0, 60, 'C1', treeUpdater.setNode)
   callOnInit(modelBranches.render, { data: memoryState.reader.entries })
+  memoryState.onUpdateData.add(modelBranches.render)
 
   const headerRendererProxy = new HeaderRendererProxy(headerRenderer)
 
@@ -53,6 +54,15 @@
 
     call(treeUpdater.unfocusNode, { nodeId: eid })
   })
+
+  function newNode(content: string) {
+    let parentNode = nearestNode.currentNearestElement
+    if (!parentNode) throw Error('Tried creating a node without a parent')
+    const eid = treeRendererProxy.elementToId(parentNode)
+    if (!eid) throw Error('Currently focused element is not a node, code is considered corrupted')
+
+    blankContext()(memoryState.addEntry, { entry: { label: content, parent: eid } })
+  }
 </script>
 
 <template>
@@ -60,7 +70,7 @@
   <div class="treeWrapper">
     <TreeRenderer ref="treeRenderer" :min-distance="150" />
   </div>
-  <InputUnderMouseRenderer />
+  <InputUnderMouseRenderer @onNewEntry="newNode" />
 </template>
 
 <style scoped>
