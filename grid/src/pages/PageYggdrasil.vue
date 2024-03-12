@@ -5,6 +5,7 @@
   import type { ComponentRef, Entry } from '@/common/utils/types'
   import MouseAngle from '@/content/input/mouse-angle'
   import NearestElement from '@/content/input/nearest-element'
+  import InputClickDouble from '@/content/input/triggers/click-double'
   import ModelBranchesCone from '@/content/model/model-branches-cone'
   import StateEntries from '@/content/model/state-entries'
   import InputUnderMouseRenderer from '@/content/view/InputUnderMouseRenderer.vue'
@@ -17,6 +18,8 @@
   import TreeRendererProxy from '@/content/view/tree/tree-renderer-proxy'
   import TreeUpdater from '@/content/view/tree/tree-updater'
   import { ref, type Ref } from 'vue'
+
+  const props = defineProps<{ pageControl: Ref<boolean> }>()
 
   const treeRenderer = ref() as ComponentRef<typeof TreeRenderer>
   const headerRenderer = ref() as ComponentRef<typeof HeaderRenderer>
@@ -106,6 +109,12 @@
 
     blankContext()(memoryState.addEntry, { entry: { label: content, parent: eid } })
   }
+
+  InputClickDouble().addListener((target) => {
+    if (target.id != 'buttonBack') return false
+    props.pageControl.value = false
+    return true
+  })
 </script>
 
 <template>
@@ -113,6 +122,9 @@
   <div class="treeWrapper">
     <TreeRenderer ref="treeRenderer" :min-distance="150" />
     <div ref="menuWrapper" class="menuWrapper">
+      <svg class="buttonWrapper" viewBox="0 0 100 100">
+        <circle id="buttonBack" cx="50" cy="50" r="20" />
+      </svg>
       <MenuCircularRenderer ref="menuRenderer" :segments="segments" />
     </div>
   </div>
@@ -134,5 +146,21 @@
     position: absolute;
     top: calc(50% - var(--size) / 2);
     left: calc(50% - var(--size) / 2);
+  }
+
+  .buttonWrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 5;
+  }
+
+  .buttonWrapper circle {
+    fill: white;
+    opacity: 0;
+  }
+
+  .buttonWrapper circle:hover {
+    opacity: 0.04;
   }
 </style>

@@ -8,7 +8,7 @@
 
 <template>
   <PageGrid v-if="!_.pageControl.value" :pageControl="_.pageControl" />
-  <PageYggdrasil v-if="_.pageControl.value" />
+  <PageYggdrasil v-if="_.pageControl.value" :pageControl="_.pageControl" />
 </template>
 
 <style>

@@ -10,8 +10,9 @@ export default class NearestElement {
 
   constructor(query: string) {
     this.query = query
-    onMounted(() => window.addEventListener('mousemove', this.onMove.bind(this)))
-    onUnmounted(() => window.removeEventListener('mousemove', this.onMove.bind(this)))
+    const onMove = this.onMove.bind(this)
+    onMounted(() => window.addEventListener('mousemove', onMove))
+    onUnmounted(() => window.removeEventListener('mousemove', onMove))
   }
 
   public get currentNearestElement(): HTMLElement | undefined {

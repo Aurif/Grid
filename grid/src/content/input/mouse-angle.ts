@@ -2,11 +2,12 @@ import { blankContext } from '@/common/core/context'
 import Listeners from '@/common/core/listeners'
 import mousePosition from '@/content/input/mouse-position'
 import type { Ref } from 'vue'
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 
 export default class MouseAngle {
   public readonly onSelected = new Listeners<{ segment: number }>()
   public readonly onUnselected = new Listeners<{ segment: number }>()
+  private destroyWatcher?: () => void
   private readonly centerElement: Ref<HTMLElement>
   private readonly segments: number
 
@@ -14,6 +15,9 @@ export default class MouseAngle {
     this.centerElement = centerElement
     this.segments = segments
     this.startTracking()
+    onUnmounted(() => {
+      if (this.destroyWatcher) this.destroyWatcher()
+    })
   }
 
   private _currentSegment: Ref<number | undefined> = ref(undefined)
@@ -34,7 +38,7 @@ export default class MouseAngle {
       return Math.round((angle / Math.PI / 2) * this.segments) % this.segments
     })
 
-    watch(this._currentSegment, (newVal, oldVal) => {
+    this.destroyWatcher = watch(this._currentSegment, (newVal, oldVal) => {
       if (newVal != undefined) this.onSelected.emit(blankContext(), { segment: newVal })
       if (oldVal != undefined) this.onUnselected.emit(blankContext(), { segment: oldVal })
     })
