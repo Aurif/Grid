@@ -47,7 +47,7 @@
       rootBranches.getAt(i).label,
       treeUpdater.setNode
     )
-    callOnInit(modelBranches.render, { data: memoryState.reader.entries })
+    callOnInit(modelBranches.render, { data: memoryState.reader.entries }) // TODO: is this needed?
     memoryState.onUpdateData.add(modelBranches.render)
   }
 
@@ -111,7 +111,7 @@
 <template>
   <HeaderRenderer ref="headerRenderer"></HeaderRenderer>
   <div class="treeWrapper">
-    <TreeRenderer ref="treeRenderer" :min-distance="170" />
+    <TreeRenderer ref="treeRenderer" :min-distance="150" />
     <div ref="menuWrapper" class="menuWrapper">
       <MenuCircularRenderer ref="menuRenderer" :segments="segments" />
     </div>
@@ -128,7 +128,7 @@
   }
 
   .menuWrapper {
-    --size: 320px;
+    --size: 300px;
     width: var(--size);
     height: var(--size);
     position: absolute;

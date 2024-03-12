@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import type TreeRenderer from './TreeRenderer.vue'
 
 export default class TreeRendererProxy extends RendererProxy<typeof TreeRenderer> {
-  get positions(): Ref<{ [id: string]: { degree: number; layer: number } }> {
+  get positions(): Ref<{ [id: string]: { degree: number; layer: number; parent?: string } }> {
     return this.safeValue.positions()
   }
 

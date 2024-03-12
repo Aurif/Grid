@@ -2,7 +2,7 @@
   import { ref } from 'vue'
 
   const props = defineProps<{ segments: number }>()
-  const r = 45
+  const r = 48
 
   function makeArcPath(i: number): string {
     function angleToPoint(angle: number): string {

@@ -7,7 +7,12 @@ export default class ModelBranchesCone {
   private readonly minDegree: number
   private readonly maxDegree: number
   private readonly root: string
-  private readonly renderCommand: Command<{ id: string; degree: number; layer: number }>
+  private readonly renderCommand: Command<{
+    id: string
+    degree: number
+    layer: number
+    parent?: string
+  }>
   render = command(
     (call: ContextCall, { data }: { data: { [id: string]: { parent: string } } }) => {
       const tree = new Branch(this.root, new ParsedTreeStructure(data))
@@ -15,7 +20,9 @@ export default class ModelBranchesCone {
       for (const id in positions) {
         if (id == this.root) continue
         const node = positions[id]
-        call(this.renderCommand, { id, degree: node.degree, layer: node.layer })
+        let parentId: string | undefined = data[id].parent
+        if (parentId == this.root) parentId = undefined
+        call(this.renderCommand, { id, degree: node.degree, layer: node.layer, parent: parentId })
       }
     }
   )
