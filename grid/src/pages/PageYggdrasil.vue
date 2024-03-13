@@ -33,7 +33,7 @@
   <div class="treeWrapper">
     <div ref="menuWrapper" class="menuWrapper">
       <svg class="buttonWrapper" viewBox="0 0 100 100">
-        <circle id="buttonBack" cx="50" cy="50" r="20" />
+        <circle id="buttonBack" cx="50" cy="50" r="40" />
       </svg>
       <MenuCircularRenderer ref="menuRenderer" :segments="_.segments" />
     </div>

@@ -105,7 +105,12 @@ export default function ({
       (360 / segments) * (i - 0.5) + 18 / segments,
       (360 / segments) * (i + 0.5) - 18 / segments,
       rootBranches.getAt(i).label,
-      treeUpdater.setNode,
+      Command.combine(treeUpdater.setNode, (call, args, context) => {
+        call(treeUpdater.setColor.nextTick(), {
+          nodeId: args.id,
+          color: nodeStates.getBy('mark', context.state).color
+        })
+      }),
       entryContext
     )
     callOnInit(modelBranches.render, { data: memoryState.reader.entries }) // TODO: is this needed?
@@ -170,8 +175,8 @@ export default function ({
 
   const nodeStates = new PresetUtil([
     { mark: undefined },
-    { mark: 'in-progress' },
-    { mark: 'done' }
+    { mark: 'in-progress', color: '#58ff1b' },
+    { mark: 'done', color: '#464646' }
   ])
 
   InputClickDouble().addListener((target) => {
@@ -180,7 +185,9 @@ export default function ({
       return true
     }
 
-    const eid = treeRendererProxy.elementToId(target)
+    const parentNode = nearestNode.currentNearestElement
+    if (!parentNode) return false
+    const eid = treeRendererProxy.elementToId(parentNode)
     if (!eid) return false
     const currentValue = memoryState.reader.get(eid)
     const newState = cycleNext(nodeStates.getValuesOf('mark'), currentValue['state'])

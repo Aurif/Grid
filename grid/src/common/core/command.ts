@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { nextTick } from 'vue'
 import type { ContextCall } from './context'
 
 export function command<A extends CommandArguments>(
@@ -60,6 +61,14 @@ export class Command<A extends CommandArguments> {
         call(this, args)
       },
       (call: ContextCall, args: A) => call(command, args)
+    ])
+  }
+
+  public nextTick(): Command<A> {
+    return new Command([
+      (call, args: A) => {
+        nextTick(() => call(this, args))
+      }
     ])
   }
 

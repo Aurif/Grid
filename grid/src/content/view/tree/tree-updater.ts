@@ -19,9 +19,17 @@ export default class TreeUpdater {
   })
   unfocusNode = command((_call: ContextCall, { nodeId }: { nodeId: string }) => {
     const element = this.proxy.idToElement(nodeId)
-    if (!element) throw Error('Tried to focus non-existent node')
+    if (!element) throw Error('Tried to unfocus non-existent node')
     element.classList.remove('active')
   })
+  setColor = command(
+    (_call: ContextCall, { nodeId, color }: { nodeId: string; color?: string }) => {
+      const element = this.proxy.idToElement(nodeId)
+      if (!element) throw Error('Tried to change color of non-existent node')
+      if (!color) element.style.removeProperty('stroke')
+      else element.style.setProperty('stroke', color)
+    }
+  )
 
   constructor(proxy: TreeRendererProxy) {
     this.proxy = proxy
