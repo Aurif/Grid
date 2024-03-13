@@ -10,7 +10,7 @@ export function command<A extends CommandArguments>(
 export type CommandArguments = object & { length?: never }
 export type CommandLike<A extends CommandArguments> =
   | Command<A>
-  | ((call: ContextCall, args: A) => void)
+  | ((call: ContextCall, args: A, context: any) => void)
 type ModifiedCommandArguments<A, K, B> = {
   [P in Exclude<keyof A, K> | keyof B]: P extends keyof A ? A[P] : P extends keyof B ? B[P] : never
 }
@@ -18,9 +18,20 @@ type ModifiedCommandArguments<A, K, B> = {
 export class Command<A extends CommandArguments> {
   readonly uid: string = 'command-' + uuidv4()
   private name?: string
-  private actions: ((call: ContextCall, args: A) => void)[]
-  constructor(actions: ((call: ContextCall, args: A) => void)[]) {
+  private actions: ((call: ContextCall, args: A, context: any) => void)[]
+
+  constructor(actions: ((call: ContextCall, args: A, context: any) => void)[]) {
     this.actions = actions
+  }
+
+  static combine<A extends CommandArguments>(...commands: CommandLike<A>[]): Command<A> {
+    const funcs: ((call: ContextCall, args: A, context: any) => void)[] = []
+    for (const command of commands) {
+      if (command instanceof Command)
+        funcs.push((call: ContextCall, args: A) => call(command, args))
+      else funcs.push(command)
+    }
+    return new Command(funcs)
   }
 
   public setName(name: string) {
@@ -29,13 +40,6 @@ export class Command<A extends CommandArguments> {
         `Tried assigning name to a command which already had a name (old: ${this.name}, new: ${name})`
       )
     this.name = name
-  }
-
-  private callDirect(call: ContextCall, args: A) {
-    if (this.name) console.debug(`Running ${this.name} with`, args)
-    for (const action of this.actions) {
-      action(call, args)
-    }
   }
 
   public mapArg<
@@ -59,14 +63,11 @@ export class Command<A extends CommandArguments> {
     ])
   }
 
-  static combine<A extends CommandArguments>(...commands: CommandLike<A>[]): Command<A> {
-    const funcs: ((call: ContextCall, args: A) => void)[] = []
-    for (const command of commands) {
-      if (command instanceof Command)
-        funcs.push((call: ContextCall, args: A) => call(command, args))
-      else funcs.push(command)
+  private callDirect(call: ContextCall, args: A, context: any) {
+    if (this.name) console.debug(`Running ${this.name} with`, args)
+    for (const action of this.actions) {
+      action(call, args, context)
     }
-    return new Command(funcs)
   }
 }
 

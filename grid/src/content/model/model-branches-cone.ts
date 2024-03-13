@@ -1,9 +1,10 @@
 import { command, enableCommandLogging, type Command } from '@/common/core/command'
-import { type ContextCall } from '@/common/core/context'
+import { ContextClass, type ContextCall } from '@/common/core/context'
 import seededRandom from '@/common/utils/seeded-random'
+import type { Entry } from '@/common/utils/types'
 import { sum } from 'lodash'
 
-export default class ModelBranchesCone {
+export default class ModelBranchesCone<CC extends { parent: string }> {
   private readonly minDegree: number
   private readonly maxDegree: number
   private readonly root: string
@@ -13,30 +14,38 @@ export default class ModelBranchesCone {
     layer: number
     parent?: string
   }>
-  render = command(
-    (call: ContextCall, { data }: { data: { [id: string]: { parent: string } } }) => {
-      const tree = new Branch(this.root, new ParsedTreeStructure(data))
-      const positions = tree.makePositions(this.minDegree, this.maxDegree, -1)
-      for (const id in positions) {
-        if (id == this.root) continue
-        const node = positions[id]
-        let parentId: string | undefined = data[id].parent
-        if (parentId == this.root) parentId = undefined
-        call(this.renderCommand, { id, degree: node.degree, layer: node.layer, parent: parentId })
-      }
+  private readonly contextClass: ContextClass<Entry<CC>>
+  render = command((call: ContextCall, { data }: { data: { [id: string]: CC } }) => {
+    const tree = new Branch(this.root, new ParsedTreeStructure(data))
+    const positions = tree.makePositions(this.minDegree, this.maxDegree, -1)
+    for (const id in positions) {
+      if (id == this.root) continue
+      const node = positions[id]
+      let parentId: string | undefined = data[id].parent
+      if (parentId == this.root) parentId = undefined
+
+      const newCall = this.contextClass.make(data[id])
+      newCall(this.renderCommand, {
+        id,
+        degree: node.degree,
+        layer: node.layer,
+        parent: parentId
+      })
     }
-  )
+  })
 
   constructor(
     minDegree: number,
     maxDegree: number,
     root: string,
-    renderCommand: Command<{ id: string; degree: number; layer: number }>
+    renderCommand: Command<{ id: string; degree: number; layer: number }>,
+    contextClass: ContextClass<Entry<CC>>
   ) {
     this.minDegree = minDegree
     this.maxDegree = maxDegree
     this.root = root
     this.renderCommand = renderCommand
+    this.contextClass = contextClass
     enableCommandLogging(this)
   }
 }

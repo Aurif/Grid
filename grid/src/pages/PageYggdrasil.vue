@@ -31,13 +31,13 @@
 <template>
   <HeaderRenderer ref="headerRenderer"></HeaderRenderer>
   <div class="treeWrapper">
-    <TreeRenderer ref="treeRenderer" :min-distance="150" />
     <div ref="menuWrapper" class="menuWrapper">
       <svg class="buttonWrapper" viewBox="0 0 100 100">
         <circle id="buttonBack" cx="50" cy="50" r="20" />
       </svg>
       <MenuCircularRenderer ref="menuRenderer" :segments="_.segments" />
     </div>
+    <TreeRenderer ref="treeRenderer" :min-distance="150" />
   </div>
   <InputUnderMouseRenderer @onNewEntry="_.newNode" />
 </template>
@@ -60,8 +60,10 @@
   }
 
   .buttonWrapper {
-    width: 100%;
-    height: 100%;
+    width: 50%;
+    height: 50%;
+    left: 25%;
+    top: 25%;
     position: absolute;
     z-index: 5;
   }

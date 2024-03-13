@@ -26,4 +26,8 @@ export default class PresetUtil<T extends {}> {
   public getAt(index: number): T {
     return this.values[index]
   }
+
+  public getValuesOf<K extends keyof T & string>(key: K): T[K][] {
+    return this.values.map((x) => x[key])
+  }
 }

@@ -2,6 +2,7 @@ import { Command } from '@/common/core/command'
 import { ContextClass, blankContext, callOnInit } from '@/common/core/context'
 import { anonymousEntity } from '@/common/core/entity'
 import DataStoreGist from '@/common/data/data-store-gist'
+import cycleNext from '@/common/utils/cycle-next'
 import PresetUtil from '@/common/utils/preset-util'
 import type { ComponentRef, Entry } from '@/common/utils/types'
 import MouseAngle from '@/content/input/mouse-angle'
@@ -104,7 +105,8 @@ export default function ({
       (360 / segments) * (i - 0.5) + 18 / segments,
       (360 / segments) * (i + 0.5) - 18 / segments,
       rootBranches.getAt(i).label,
-      treeUpdater.setNode
+      treeUpdater.setNode,
+      entryContext
     )
     callOnInit(modelBranches.render, { data: memoryState.reader.entries }) // TODO: is this needed?
     memoryState.onUpdateData.add(modelBranches.render)
@@ -166,10 +168,25 @@ export default function ({
     blankContext()(memoryState.addEntry, { entry: { label: content, parent: eid } })
   }
 
+  const nodeStates = new PresetUtil([
+    { mark: undefined },
+    { mark: 'in-progress' },
+    { mark: 'done' }
+  ])
+
   InputClickDouble().addListener((target) => {
-    if (target.id != 'buttonBack') return false
-    pageControl.value = false
-    return true
+    if (target.id == 'buttonBack') {
+      pageControl.value = false
+      return true
+    }
+
+    const eid = treeRendererProxy.elementToId(target)
+    if (!eid) return false
+    const currentValue = memoryState.reader.get(eid)
+    const newState = cycleNext(nodeStates.getValuesOf('mark'), currentValue['state'])
+    blankContext()(memoryState.updateEntry, { eid, entry: { ...currentValue, state: newState } })
+
+    return false
   })
 
   return { newNode, segments }
