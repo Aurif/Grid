@@ -26,8 +26,16 @@ export default class TreeUpdater {
     (_call: ContextCall, { nodeId, color }: { nodeId: string; color?: string }) => {
       const element = this.proxy.idToElement(nodeId)
       if (!element) throw Error('Tried to change color of non-existent node')
-      if (!color) element.style.removeProperty('stroke')
-      else element.style.setProperty('stroke', color)
+      const elementLine = this.proxy.idToLineElement(nodeId)
+      if (!elementLine) throw Error("Line doesn't exist for node, renderer is considered corrupted")
+
+      if (!color) {
+        element.style.removeProperty('stroke')
+        elementLine.style.removeProperty('stroke')
+      } else {
+        element.style.setProperty('stroke', color)
+        elementLine.style.setProperty('stroke', color)
+      }
     }
   )
   setNodeStyle = command(

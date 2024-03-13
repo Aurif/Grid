@@ -8,6 +8,7 @@
 
   const svg = ref<HTMLElement>()
   const nodes = ref<{ [id: string]: SVGElement }>({})
+  const lines = ref<{ [id: string]: SVGElement }>({})
 
   const positions = ref<{ [id: string]: { degree: number; layer: number; parent?: string } }>({})
   const maxLayer = computed(() => {
@@ -27,7 +28,11 @@
     return nodes.value[nodeId]
   }
 
-  defineExpose({ positions: () => positions, elementToId, idToElement })
+  function idToLineElement(nodeId: string): SVGElement | undefined {
+    return lines.value[nodeId]
+  }
+
+  defineExpose({ positions: () => positions, elementToId, idToElement, idToLineElement })
 </script>
 
 <template>
@@ -36,27 +41,26 @@
     :style="{ '--layer-size': `calc((50vmin - ${props.minDistance + 8}px)/${maxLayer + 1})` }"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle
-      v-for="(pos, id) in positions"
-      :key="id"
-      :ref="(el) => (nodes[id] = el as SVGElement)"
-      :container-uid="uid"
-      :node-id="id"
-      :style="{
-        transform: `rotate(${pos.degree}deg) translateY(calc(${-props.minDistance - 8}px - var(--layer-size) * ${pos.layer}))`
-      }"
-      cx="50%"
-      cy="50%"
-      r="7"
-    />
-    <line
-      v-for="(pos, id) in linePos"
-      :key="id"
-      :x1="pos.x1"
-      :x2="pos.x2"
-      :y1="pos.y1"
-      :y2="pos.y2"
-    />
+    <g v-for="(pos, id) in positions" :key="id">
+      <circle
+        :ref="(el) => (nodes[id] = el as SVGElement)"
+        :container-uid="uid"
+        :node-id="id"
+        :style="{
+          transform: `rotate(${pos.degree}deg) translateY(calc(${-props.minDistance - 8}px - var(--layer-size) * ${pos.layer}))`
+        }"
+        cx="50%"
+        cy="50%"
+        r="7"
+      />
+      <line
+        :ref="(el) => (lines[id] = el as SVGElement)"
+        :x1="linePos[id].x1"
+        :x2="linePos[id].x2"
+        :y1="linePos[id].y1"
+        :y2="linePos[id].y2"
+      />
+    </g>
   </svg>
 </template>
 
@@ -94,6 +98,10 @@
 
   circle[nodeStyle='glow'] {
     opacity: 0.8;
+  }
+
+  circle[nodeStyle='glow'] ~ line {
+    opacity: 0.35;
   }
 
   circle[nodeStyle='glow'].active {

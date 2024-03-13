@@ -12,7 +12,11 @@ export default class TreeRendererProxy extends RendererProxy<typeof TreeRenderer
     return this.source.value.elementToId(span)
   }
 
-  idToElement(nodeId: string): HTMLElement | undefined {
+  idToElement(nodeId: string): SVGElement | undefined {
     return this.safeValue.idToElement(nodeId)
+  }
+  
+  idToLineElement(nodeId: string): SVGElement | undefined {
+    return this.safeValue.idToLineElement(nodeId)
   }
 }
