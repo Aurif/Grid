@@ -30,6 +30,14 @@ export default class TreeUpdater {
       else element.style.setProperty('stroke', color)
     }
   )
+  setNodeStyle = command(
+    (_call: ContextCall, { nodeId, style }: { nodeId: string; style?: string }) => {
+      const element = this.proxy.idToElement(nodeId)
+      if (!element) throw Error('Tried to change color of non-existent node')
+      if (!style) element.removeAttribute('nodeStyle')
+      else element.setAttribute('nodeStyle', style)
+    }
+  )
 
   constructor(proxy: TreeRendererProxy) {
     this.proxy = proxy

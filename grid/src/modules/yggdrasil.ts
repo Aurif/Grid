@@ -106,9 +106,14 @@ export default function ({
       (360 / segments) * (i + 0.5) - 18 / segments,
       rootBranches.getAt(i).label,
       Command.combine(treeUpdater.setNode, (call, args, context) => {
+        const state = nodeStates.getBy('mark', context.state)
         call(treeUpdater.setColor.nextTick(), {
           nodeId: args.id,
-          color: nodeStates.getBy('mark', context.state).color
+          color: state.color
+        })
+        call(treeUpdater.setNodeStyle.nextTick(), {
+          nodeId: args.id,
+          style: state.style
         })
       }),
       entryContext
@@ -175,8 +180,8 @@ export default function ({
 
   const nodeStates = new PresetUtil([
     { mark: undefined },
-    { mark: 'in-progress', color: '#58ff1b' },
-    { mark: 'done', color: '#464646' }
+    { mark: 'in-progress', color: '#6bff28', style: 'glow' },
+    { mark: 'done', color: '#464646', style: 'dashed' }
   ])
 
   InputClickDouble().addListener((target) => {

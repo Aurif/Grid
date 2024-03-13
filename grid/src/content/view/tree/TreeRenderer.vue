@@ -83,8 +83,20 @@
     opacity: 0.15;
   }
 
-  .active {
+  circle.active {
     opacity: 1;
     stroke-width: 3px;
+  }
+
+  circle[nodeStyle='dashed'] {
+    stroke-dasharray: 3.55;
+  }
+
+  circle[nodeStyle='glow'] {
+    opacity: 0.8;
+  }
+
+  circle[nodeStyle='glow'].active {
+    opacity: 1;
   }
 </style>
