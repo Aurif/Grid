@@ -38,7 +38,7 @@
 <template>
   <svg
     ref="svg"
-    :style="{ '--layer-size': `calc((50vmin - ${props.minDistance + 8}px)/${maxLayer + 1})` }"
+    :style="{ '--layer-size': `calc((50vmin - ${props.minDistance + 8}px)/${maxLayer})` }"
     xmlns="http://www.w3.org/2000/svg"
   >
     <g v-for="(pos, id) in positions" :key="id">

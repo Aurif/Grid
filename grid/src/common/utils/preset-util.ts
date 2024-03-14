@@ -15,12 +15,22 @@ export default class PresetUtil<T extends {}> {
   }
 
   public getIndexBy<K extends keyof T & string>(key: K, value: T[K]): number {
+    function asString(value: T[K]): string {
+      if (value == undefined) return ''
+      return '' + value
+    }
+
     if (!this.getByCache[key]) {
       this.getByCache[key] = {}
       for (let i = 0; i < this.values.length; i++)
-        this.getByCache[key]['' + this.values[i][key]] = i
+        this.getByCache[key][asString(this.values[i][key])] = i
     }
-    return this.getByCache[key]['' + value]
+
+    const index = this.getByCache[key][asString(value)]
+    if (index == undefined && value != undefined) return this.getIndexBy(key, undefined as T[K])
+    if (index == undefined)
+      throw Error(`There is no preset with "${key}" equal to "${value}" and no default value`)
+    return index
   }
 
   public getAt(index: number): T {

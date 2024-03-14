@@ -36,8 +36,7 @@ export default function ({
     { label: 'TODAY', color: '#f98f71', mark: 'day' },
     { label: 'THIS WEEK' },
     { label: 'THIS MONTH', color: '#765c81', mark: 'month' },
-    { label: 'NEXT 4 MONTHS', color: '#384456', mark: 'quarter' },
-    { label: 'GOAL', color: '#ffffff', mark: 'goal' }
+    { label: 'NEXT 4 MONTHS', color: '#384456', mark: 'quarter' }
   ])
   const cyclicState = new StateCyclic(timeStages.values)
 
