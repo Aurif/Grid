@@ -18,7 +18,10 @@
     .run(Grid, { gridRenderer })
     .run(TodoList, { dataStore: await DataStoreGist.make('grid.json') })
     .run(TimeStages, {})
-    .run(yggdrasilMixinGrid, { pageControl: props.pageControl }).paramSpace
+    .run(yggdrasilMixinGrid, {
+      pageControl: props.pageControl,
+      dataStore: await DataStoreGist.make('yggdrasil.json')
+    }).paramSpace
 </script>
 
 <template>

@@ -11,7 +11,7 @@ export default class StateEntries<E extends {}> {
   rebroadcast = command(() => {
     this.fullListenerBroadcast(this.onNewEntry.emit.bind(this.onNewEntry))
   })
-  
+
   private readonly entries: { [id: string]: Entry<E> }
   removeEntry = command((_call: ContextCall, { eid }: { eid: string }) => {
     if (!this.entries[eid]) throw Error('Tried removing non-existent entry ' + eid)
@@ -44,6 +44,9 @@ export default class StateEntries<E extends {}> {
     this.entries = dataStore.hook
     this.onNewEntry.onNewListenerAdded = (listener) => {
       this.fullListenerBroadcast((call, data) => call(listener, data))
+    }
+    this.onUpdateData.onNewListenerAdded = (listener) => {
+      blankContext()(listener, { data: this.entries })
     }
     enableCommandLogging(this)
   }

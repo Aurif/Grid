@@ -4,6 +4,7 @@ import { ref, watch, type Ref } from 'vue'
 import DataStore from './data-store'
 
 const octokit = new Octokit({ auth: gistToken })
+
 async function preloadData() {
   const remoteDataRaw = await octokit.request(`GET /gists/{gist_id}`, {
     gist_id: gistId,
@@ -18,11 +19,14 @@ async function preloadData() {
   }
   return remoteData
 }
+
 const preloadedData = preloadData()
 
 export default class DataStoreGist<T extends {}> extends DataStore<T> {
+  private static storeCache: { [key: string]: DataStoreGist<any> } = {}
   private readonly filename: string
   private readonly dataRef: Ref<T>
+
   private constructor(data: T, filename: string) {
     super()
     this.dataRef = ref(data) as Ref<T>
@@ -32,12 +36,14 @@ export default class DataStoreGist<T extends {}> extends DataStore<T> {
     })
   }
 
-  static async make<T extends {}>(filename: string): Promise<DataStoreGist<T>> {
-    return new DataStoreGist<T>(await this.getFromRemote(filename), filename)
-  }
-
   get hook(): T {
     return this.dataRef.value
+  }
+
+  static async make<T extends {}>(filename: string): Promise<DataStoreGist<T>> {
+    if (!this.storeCache[filename])
+      this.storeCache[filename] = new DataStoreGist<T>(await this.getFromRemote(filename), filename)
+    return this.storeCache[filename]
   }
 
   private static async getFromRemote<T extends {}>(filename: string): Promise<T> {

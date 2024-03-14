@@ -1,5 +1,5 @@
 import { Command } from '@/common/core/command'
-import { ContextClass, blankContext, callOnInit } from '@/common/core/context'
+import { ContextClass, blankContext } from '@/common/core/context'
 import { anonymousEntity } from '@/common/core/entity'
 import DataStoreGist from '@/common/data/data-store-gist'
 import cycleNext from '@/common/utils/cycle-next'
@@ -31,7 +31,8 @@ export function yggdrasilMixinGrid({
   entryContext,
   scatterModel,
   gridInputProxy,
-  pageControl
+  pageControl,
+  dataStore
 }: {
   displayState: StateDisplay
   gridUpdater: GridUpdater
@@ -39,6 +40,7 @@ export function yggdrasilMixinGrid({
   scatterModel: ModelScatter
   gridInputProxy: MultiInputProxy
   pageControl: Ref<boolean>
+  dataStore: DataStoreGist<{ [id: string]: Entry<{ parent: string; label: string }> }>
 }) {
   const cornerDisplayEntity = anonymousEntity()
   cornerDisplayEntity.withInput(
@@ -60,12 +62,17 @@ export function yggdrasilMixinGrid({
     blankContext()(cornerModel.rerender, {})
   })
 
-  const cache = new Set()
-  entryContext.registerModifier(scatterModel.displayEntry, (command, context) => {
-    if (context['time-stage'] != 'goal') return command
-    if (cache.has(context.value)) return
-    cache.add(context.value)
-    blankContext()(cornerModel.displayEntry, { entry: context.value })
+  const yggdrasilEntryContext = new ContextClass<Entry<{ parent: string; label: string }>>()
+  const memoryState = new StateEntries<{ parent: string; label: string }>(
+    dataStore,
+    yggdrasilEntryContext
+  )
+  memoryState.onUpdateData.add((call, { data }) => {
+    call(cornerModel.setDisplayedEntries, {
+      entries: Object.values(data)
+        .filter((e) => e.state == 'in-progress')
+        .map((e) => e.label)
+    })
   })
 }
 
@@ -118,7 +125,6 @@ export default function ({
       }),
       entryContext
     )
-    callOnInit(modelBranches.render, { data: memoryState.reader.entries }) // TODO: is this needed?
     memoryState.onUpdateData.add(modelBranches.render)
   }
 
