@@ -10,9 +10,9 @@ export default class ModelCorner {
     const newCall = blankContext()
     for (let i = 0; i < this.entries.length; i++) {
       const entry = this.entries[i]
-      for (let j = 0; j < entry.length; j++) {
-        newCall(this.renderCommand, { x: j, y: this.state.rows - 1 - i, char: entry[j] })
-      }
+      Array.from(entry).forEach((char, j) => {
+        newCall(this.renderCommand, { x: j, y: this.state.rows - 1 - i, char })
+      })
     }
   })
   setDisplayedEntries = command((call: ContextCall, { entries }: { entries: string[] }) => {

@@ -69,9 +69,12 @@ export function yggdrasilMixinGrid({
   )
   memoryState.onUpdateData.add((call, { data }) => {
     call(cornerModel.setDisplayedEntries, {
-      entries: Object.values(data)
-        .filter((e) => e.state == 'in-progress')
-        .map((e) => e.label)
+      entries: [
+        '🜍',
+        ...Object.values(data)
+          .filter((e) => e.state == 'in-progress')
+          .map((e) => e.label)
+      ]
     })
   })
 }
