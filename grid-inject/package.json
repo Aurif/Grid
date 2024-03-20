@@ -1,0 +1,13 @@
+{
+  "name": "inject-grid",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "web-ext run --verbose"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "web-ext": "^7.11.0"
+  }
+}
