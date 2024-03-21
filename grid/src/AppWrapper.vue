@@ -1,8 +1,11 @@
-<script setup lang="ts">
-  import App from '@/App.vue';
+<script lang="ts" setup>
+  import App from '@/App.vue'
+
+  const inframe = window.self !== window.top
 </script>
 
 <template>
+  <div :class="{ background: true, inframe: inframe }"></div>
   <Suspense>
     <App />
     <template #fallback>
@@ -19,5 +22,18 @@
     font-size: 8vmin;
     text-shadow: 0 0 4px #2d2b39;
     color: #2d2b39;
+  }
+
+  .background {
+    background-color: #181818;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    z-index: -999;
+  }
+
+  .background.inframe {
+    background-color: #000000aa;
+    backdrop-filter: blur(20px);
   }
 </style>

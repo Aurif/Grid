@@ -13,7 +13,6 @@
 
 <style>
   body {
-    background-color: #181818;
     margin: 0;
     height: 100vh;
     width: 100vw;
