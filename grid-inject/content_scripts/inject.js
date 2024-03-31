@@ -12,6 +12,7 @@ function inject(request, sender, sendResponse) {
         iframe.contentWindow.addEventListener('mousedown', eventListener)
     }, 100)
 
+    setStaticFavIcon()
 }
 
 function makeIframe() {
@@ -60,4 +61,18 @@ function throttle(mainFunction, delay) {
             nextRun = Date.now() + delay;
         }
     };
+}
+
+function updateFavIcon(icon) {
+    var link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+    }
+    link.href = icon
+}
+
+function setStaticFavIcon() {
+    updateFavIcon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAMfAAADHwHmEQywAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAKNJREFUWIXt1rEJAkEQheF/vI2FCy8VrMAS7EWbEAw8U1MDO7AGS7AHQYQTBMWLZZ+R8RksTDITTfBgP4ZhGZOEZ41cXw8AkF5d+88SXOpmNQF43rcnk+alAO4TCEAAAhCAAAQggZaDKdH/WkM70LEUwLxPsvTuNrOhUCY/6mZ9Behv7VSVxsUAGTsPx6oDsAD4JNubiIMkAAEoVu4fkfsEAvAF1BsrXLz2JisAAAAASUVORK5CYII=")
 }

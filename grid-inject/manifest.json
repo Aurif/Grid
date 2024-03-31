@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "",
   "icons": {
-    "48": "icons/bgpicker-48.png"
+    "48": "icons/48.png"
   },
   "permissions": [
     "tabs",
@@ -13,7 +13,7 @@
   ],
   "browser_action": {
     "default_icon": {
-      "32": "icons/bgpicker-32.png"
+      "32": "icons/32.png"
     },
     "default_title": "I N J E C T   G R I D",
     "default_popup": "popup/popup.html"
