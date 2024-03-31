@@ -6,12 +6,14 @@
 
 <template>
   <div :class="{ background: true, inframe: inframe }"></div>
-  <Suspense>
-    <App />
-    <template #fallback>
-      <div class="loading">Loading...</div>
-    </template>
-  </Suspense>
+  <div class="inner">
+    <Suspense>
+      <App />
+      <template #fallback>
+        <div class="loading">Loading...</div>
+      </template>
+    </Suspense>
+  </div>
 </template>
 
 <style scoped>
@@ -35,5 +37,23 @@
   .background.inframe {
     background-color: #000000aa;
     backdrop-filter: blur(20px);
+    transition:
+      background-color 1s,
+      backdrop-filter 1s;
+  }
+
+  .hidden .background.inframe {
+    background-color: transparent;
+    backdrop-filter: blur(0px);
+  }
+
+  .hidden .inner {
+    opacity: 0;
+  }
+
+  .inner {
+    height: 100%;
+    width: 100%;
+    transition: opacity 0.5s;
   }
 </style>
