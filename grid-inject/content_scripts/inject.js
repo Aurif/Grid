@@ -24,6 +24,7 @@ function makeIframe() {
     iframe.style['z-index'] = "99999"
     iframe.style.top = "0"
     iframe.style.left = "0"
+    iframe.id = "injected-grid"
     return iframe
 }
 
@@ -54,9 +55,7 @@ function throttle(mainFunction, delay) {
     let nextRun = 0
 
     return (...args) => {
-        console.log(nextRun, Date.now())
         if (nextRun < Date.now()) {
-            console.log("Running?...")
             mainFunction(...args);
             nextRun = Date.now() + delay;
         }
