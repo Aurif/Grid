@@ -2,6 +2,7 @@
   import App from '@/App.vue'
 
   const inframe = window.self !== window.top
+  if (inframe) window.document.body.classList.add('hidden')
 </script>
 
 <template>

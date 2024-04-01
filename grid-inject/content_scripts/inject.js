@@ -10,6 +10,7 @@ function inject(request, sender, sendResponse) {
     window.addEventListener('mousedown', eventListener)
     setTimeout(() => {
         iframe.contentWindow.addEventListener('mousedown', eventListener)
+        initialAnimation(iframe)
     }, 100)
 
     setStaticFavIcon()
@@ -25,6 +26,7 @@ function makeIframe() {
     iframe.style['z-index'] = "99999"
     iframe.style.top = "0"
     iframe.style.left = "0"
+    iframe.style.opacity = "0"
     iframe.id = "injected-grid"
     return iframe
 }
@@ -61,6 +63,11 @@ function throttle(mainFunction, delay) {
             nextRun = Date.now() + delay;
         }
     };
+}
+
+function initialAnimation(iframe) {
+    iframe.style.opacity = "1"
+    iframe.contentWindow.document.body.classList.remove("hidden")
 }
 
 function updateFavIcon(icon) {
