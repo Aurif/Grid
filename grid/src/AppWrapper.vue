@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-  import App from '@/App.vue'
+  import App from '@/App.vue';
 
   const inframe = window.self !== window.top
   if (inframe) window.document.body.classList.add('hidden')
 </script>
 
 <template>
+  <div :class="{ 'pre-background': true, inframe: inframe }"></div>
   <div :class="{ background: true, inframe: inframe }"></div>
   <div class="inner">
     <Suspense>
@@ -27,15 +28,20 @@
     color: #2d2b39;
   }
 
-  .background {
-    background-color: #181818;
+  .pre-background:not(.inframe) {
+    background-image: url('background.png');
+    background-size: cover;
+    background-position-x: 50%;
+  }
+
+  .background, .pre-background {
     height: 100%;
     width: 100%;
     position: fixed;
     z-index: -999;
   }
 
-  .background.inframe {
+  .background {
     background-color: #000000aa;
     backdrop-filter: blur(20px);
     transition:
