@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-  import { v4 as uuidv4 } from 'uuid'
-  import { ref, watch, type Ref } from 'vue'
+  import { v4 as uuidv4 } from 'uuid';
+  import { ref, watch, type Ref } from 'vue';
 
   const props = defineProps<{
     rows: Ref<number>
@@ -19,7 +19,6 @@
 
   const skins = ['ABCDEFGHIJKLMNOPRSTUVWXYZ#%:+1234567890', '🜂🜄🜊🜍🜎🜔🜕🜘🜛🜶🜻🝎🝆🝁🝔🜋🜱']
   const charset = Array.from(skins[1])
-
   function randomChar() {
     return charset[Math.floor(Math.random() * charset.length)]
   }
@@ -38,20 +37,17 @@
     return [parseInt(posX), parseInt(posY)]
   }
 
-  defineExpose({ posToChar, spanToPos })
+  let parentElement = ref<HTMLElement>()
+
+  defineExpose({ posToChar, spanToPos, parentElement: () => parentElement })
 </script>
 
 <template>
-  <div class="parent">
+  <div class="parent" ref="parentElement">
     <div v-for="y in rows.value * 1" :key="y" class="row">
-      <span
-        v-for="x in columns.value * 1"
-        :key="stateId + ':' + (x - 1) + ':' + (y - 1)"
-        :ref="(el) => (chars[x - 1 + ':' + (y - 1)] = el as HTMLSpanElement)"
-        :container-uid="uid"
-        :pos-x="x - 1"
-        :pos-y="y - 1"
-      >
+      <span v-for="x in columns.value * 1" :key="stateId + ':' + (x - 1) + ':' + (y - 1)"
+        :ref="(el) => (chars[x - 1 + ':' + (y - 1)] = el as HTMLSpanElement)" :container-uid="uid" :pos-x="x - 1"
+        :pos-y="y - 1">
         {{ randomChar() }}
       </span>
     </div>

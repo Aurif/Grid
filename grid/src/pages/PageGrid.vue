@@ -25,13 +25,37 @@
 </script>
 
 <template>
-  <GridRenderer ref="gridRenderer" :bind="_.gridUpdater" :columns="_.columns" :rows="_.rows" />
-  <InputRenderer
-    :rows="_.rows"
-    @onNewEntry="
-      _.entryCreationContext.make(null)(_.memoryState.addEntry, { entry: { value: $event } })
-    "
-  />
+  <div class="fullsize panels">
+    <div class="fullsize panel-main">
+      <GridRenderer ref="gridRenderer" :bind="_.gridUpdater" :columns="_.columns" :rows="_.rows" />
+    </div>
+    <div class="panel-side"></div>
+  </div>
+
+  <InputRenderer :rows="_.rows" @onNewEntry="
+    _.entryCreationContext.make(null)(_.memoryState.addEntry, { entry: { value: $event } })
+    " />
 </template>
 
-<style></style>
+<style scoped>
+  .fullsize {
+    width: 100%;
+    height: 100%;
+  }
+
+  .panels {
+    display: grid;
+    grid-template-areas: 'main right';
+    grid-template-columns: auto 30em;
+  }
+
+  .panel-main {
+    grid-area: main;
+  }
+
+  .panel-side {
+    grid-area: right;
+  }
+
+
+</style>

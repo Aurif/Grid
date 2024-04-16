@@ -9,11 +9,10 @@ import GridRendererProxy from '@/content/view/grid/grid-renderer-proxy'
 import GridUpdater from '@/content/view/grid/grid-updater'
 
 export default function ({ gridRenderer }: { gridRenderer: ComponentRef<typeof GridRenderer> }) {
-  const { rows, columns } = determinePositioning()
-  const displayState = new StateDisplay(rows, columns)
-
   const gridRendererProxy = new GridRendererProxy(gridRenderer)
   const gridUpdater = new GridUpdater(gridRendererProxy)
+  const { rows, columns } = determinePositioning(gridRendererProxy.parentElement)
+  const displayState = new StateDisplay(rows, columns)
 
   const gridInputProxy = new MultiInputProxy((el) => {
     const pos = gridRendererProxy.spanToPos(el)
