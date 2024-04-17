@@ -1,5 +1,5 @@
-import { command, enableCommandLogging } from '@/common/core/command'
-import type { ContextCall } from '@/common/core/context'
+import { command, enableCommandLogging } from '@/common/core/commands/command'
+import type { ContextCall } from '@/common/core/commands/context'
 import type GridRendererProxy from './grid-renderer-proxy'
 
 export default class GridUpdater {

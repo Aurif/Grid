@@ -1,6 +1,6 @@
-import { command, enableCommandLogging } from '@/common/core/command'
-import { ContextClass, blankContext, type ContextCall } from '@/common/core/context'
-import Listeners from '@/common/core/listeners'
+import { command, enableCommandLogging } from '@/common/core/commands/command'
+import { ContextClass, blankContext, type ContextCall } from '@/common/core/commands/context'
+import Listeners from '@/common/core/commands/listeners'
 import type DataStore from '@/common/data/data-store'
 import type { Entry } from '@/common/utils/types'
 

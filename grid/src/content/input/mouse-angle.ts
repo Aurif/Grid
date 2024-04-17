@@ -1,5 +1,5 @@
-import { blankContext } from '@/common/core/context'
-import Listeners from '@/common/core/listeners'
+import { blankContext } from '@/common/core/commands/context'
+import Listeners from '@/common/core/commands/listeners'
 import mousePosition from '@/content/input/mouse-position'
 import type { Ref } from 'vue'
 import { computed, onUnmounted, ref, watch } from 'vue'

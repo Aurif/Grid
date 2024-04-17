@@ -2,8 +2,9 @@
   import { determinePositioning } from '@/content/input/positioning'
   import GalaxyRenderer from '@/content/view/galaxy/GalaxyRenderer.vue'
   import InputGlobalRenderer from '@/content/view/InputGlobalRenderer.vue'
+  import { ref } from 'vue'
 
-  const _ = determinePositioning()
+  const _ = determinePositioning(ref(window.document.body))
 </script>
 
 <template>

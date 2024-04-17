@@ -1,5 +1,5 @@
-import { blankContext } from '@/common/core/context'
-import Listeners from '@/common/core/listeners'
+import { blankContext } from '@/common/core/commands/context'
+import Listeners from '@/common/core/commands/listeners'
 import { onMounted, onUnmounted } from 'vue'
 
 export default class NearestElement {

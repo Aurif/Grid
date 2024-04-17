@@ -1,4 +1,4 @@
-import type Entity from '@/common/core/entity'
+import type Entity from '@/common/core/commands/entity'
 import type Input from './input'
 import type { InputAcceptorSpawn } from './input-acceptor'
 import InputAcceptor from './input-acceptor'
@@ -28,8 +28,9 @@ export default class MultiInputProxy {
 }
 
 class MultiInputProxySubset {
-  private fullset: MultiInputProxy
   readonly acceptor: InputAcceptor = new InputAcceptor()
+  private fullset: MultiInputProxy
+
   constructor(fullset: MultiInputProxy) {
     this.fullset = fullset
   }

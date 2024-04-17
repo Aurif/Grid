@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import App from '@/App.vue';
+  import App from '@/App.vue'
 
   const inframe = window.self !== window.top
   if (inframe) window.document.body.classList.add('hidden')
@@ -24,8 +24,9 @@
     text-align: center;
     line-height: 100vh;
     font-size: 8vmin;
-    text-shadow: 0 0 4px #2d2b39;
-    color: #2d2b39;
+    text-shadow: 0 0 4px #ffffff;
+    color: #ffffff;
+    opacity: 0.1;
   }
 
   .pre-background:not(.inframe) {
@@ -34,7 +35,8 @@
     background-position-x: 50%;
   }
 
-  .background, .pre-background {
+  .background,
+  .pre-background {
     height: 100%;
     width: 100%;
     position: fixed;
@@ -62,5 +64,26 @@
     height: 100%;
     width: 100%;
     transition: opacity 0.5s;
+  }
+</style>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  #app {
+    height: 100%;
+    width: 100%;
+  }
+
+  div,
+  input,
+  span {
+    text-transform: uppercase;
+    font-family: 'Roboto Mono', monospace;
   }
 </style>

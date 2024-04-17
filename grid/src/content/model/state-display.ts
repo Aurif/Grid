@@ -1,6 +1,6 @@
-import { command, enableCommandLogging } from '@/common/core/command'
-import type { ContextCall } from '@/common/core/context'
-import type Entity from '@/common/core/entity'
+import { command, enableCommandLogging } from '@/common/core/commands/command'
+import type { ContextCall } from '@/common/core/commands/context'
+import type Entity from '@/common/core/commands/entity'
 import type { Ref } from 'vue'
 import { watch } from 'vue'
 
@@ -9,17 +9,6 @@ export default class StateDisplay {
   ownerMapping: { [key: string]: [number, number][] } = {}
   rows: Ref<number>
   columns: Ref<number>
-
-  constructor(rows: Ref<number>, columns: Ref<number>) {
-    this.rows = rows
-    this.columns = columns
-    watch([columns, rows], () => {
-      this.state = {}
-      this.ownerMapping = {}
-    })
-    enableCommandLogging(this)
-  }
-
   setAt = command(
     (
       _call: ContextCall,
@@ -51,7 +40,6 @@ export default class StateDisplay {
         this.ownerMapping[owner.uid].push([x, y])
     }
   )
-
   removeAt = command(
     (_call: ContextCall, { x, y, owner }: { x: number; y: number; owner: Entity }) => {
       let ownerIndex
@@ -84,6 +72,16 @@ export default class StateDisplay {
     }
   )
 
+  constructor(rows: Ref<number>, columns: Ref<number>) {
+    this.rows = rows
+    this.columns = columns
+    watch([columns, rows], () => {
+      this.state = {}
+      this.ownerMapping = {}
+    })
+    enableCommandLogging(this)
+  }
+
   get reader(): StateDisplayReader {
     return new StateDisplayReader(this)
   }
@@ -94,6 +92,14 @@ export class StateDisplayReader {
 
   constructor(state: StateDisplay) {
     this.state = state
+  }
+
+  get columns() {
+    return this.state.columns.value
+  }
+
+  get rows() {
+    return this.state.rows.value
   }
 
   getAt(x: number, y: number): string | undefined {
@@ -110,12 +116,5 @@ export class StateDisplayReader {
 
   watchResize(handler: () => void) {
     return watch([this.state.columns, this.state.rows], handler, { flush: 'post' })
-  }
-
-  get columns() {
-    return this.state.columns.value
-  }
-  get rows() {
-    return this.state.rows.value
   }
 }

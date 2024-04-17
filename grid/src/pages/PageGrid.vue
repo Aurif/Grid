@@ -27,14 +27,17 @@
 <template>
   <div class="fullsize panels">
     <div class="fullsize panel-main">
-      <GridRenderer ref="gridRenderer" :bind="_.gridUpdater" :columns="_.columns" :rows="_.rows" />
+      <GridRenderer ref="gridRenderer" :columns="_.columns" :rows="_.rows" />
     </div>
     <div class="panel-side"></div>
   </div>
 
-  <InputRenderer :rows="_.rows" @onNewEntry="
-    _.entryCreationContext.make(null)(_.memoryState.addEntry, { entry: { value: $event } })
-    " />
+  <InputRenderer
+    :rows="_.rows"
+    @onNewEntry="
+      _.entryCreationContext.make(null)(_.memoryState.addEntry, { entry: { value: $event } })
+    "
+  />
 </template>
 
 <style scoped>
@@ -56,6 +59,4 @@
   .panel-side {
     grid-area: right;
   }
-
-
 </style>

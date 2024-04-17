@@ -1,6 +1,11 @@
-import { Command } from '@/common/core/command'
-import { ContextClass, blankContext, callOnInit, type ContextCall } from '@/common/core/context'
-import Entity, { anonymousEntity } from '@/common/core/entity'
+import { Command } from '@/common/core/commands/command'
+import {
+  ContextClass,
+  blankContext,
+  callOnInit,
+  type ContextCall
+} from '@/common/core/commands/context'
+import Entity, { anonymousEntity } from '@/common/core/commands/entity'
 import PresetUtil from '@/common/utils/preset-util'
 import type { Entry } from '@/common/utils/types'
 import type MultiInputProxy from '@/content/input/multi-input-proxy'

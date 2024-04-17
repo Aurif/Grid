@@ -1,33 +1,17 @@
 <script lang="ts" setup>
-  import PageGrid from '@/pages/PageGrid.vue'
-  import PageYggdrasil from '@/pages/PageYggdrasil.vue'
-  import { ref } from 'vue'
+  import ModuleLoader from '@/common/core/module-loader'
+  import SlotRenderer from '@/common/core/slots/slot-renderer.vue'
+  import DataStoreGist from '@/common/data/data-store-gist'
+  import Grid from '@/modules/grid'
+  import TimeStages from '@/modules/time-stages'
+  import TodoList from '@/modules/todo-list'
 
-  const _ = { pageControl: ref(false) }
+  ModuleLoader.init()
+    .run(Grid, {})
+    .run(TodoList, { dataStore: await DataStoreGist.make('grid.json') })
+    .run(TimeStages, {})
 </script>
 
 <template>
-  <PageGrid v-if="!_.pageControl.value" :pageControl="_.pageControl" />
-  <PageYggdrasil v-if="_.pageControl.value" :pageControl="_.pageControl" />
+  <SlotRenderer />
 </template>
-
-<style>
-  body {
-    margin: 0;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-  }
-
-  #app {
-    height: 100%;
-    width: 100%;
-  }
-
-  div,
-  input,
-  span {
-    text-transform: uppercase;
-    font-family: 'Roboto Mono', monospace;
-  }
-</style>

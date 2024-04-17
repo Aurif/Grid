@@ -1,5 +1,5 @@
-import { Command, command, enableCommandLogging } from '@/common/core/command'
-import { blankContext, type ContextCall } from '@/common/core/context'
+import { Command, command, enableCommandLogging } from '@/common/core/commands/command'
+import { blankContext, type ContextCall } from '@/common/core/commands/context'
 import type { StateDisplayReader } from './state-display'
 
 export default class ModelCorner {

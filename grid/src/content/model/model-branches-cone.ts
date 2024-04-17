@@ -1,5 +1,5 @@
-import { command, enableCommandLogging, type Command } from '@/common/core/command'
-import { ContextClass, type ContextCall } from '@/common/core/context'
+import { command, enableCommandLogging, type Command } from '@/common/core/commands/command'
+import { ContextClass, type ContextCall } from '@/common/core/commands/context'
 import seededRandom from '@/common/utils/seeded-random'
 import type { Entry } from '@/common/utils/types'
 import { sum } from 'lodash'
