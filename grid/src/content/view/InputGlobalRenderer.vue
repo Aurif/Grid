@@ -23,9 +23,9 @@
 
 <style scoped>
   :deep(input) {
-    position: fixed;
+    position: absolute;
     left: 0;
-    width: 100vw;
+    width: 100%;
     top: calc(50% - var(--input-font-size) / 2);
     height: var(--input-font-size);
     font-size: var(--input-font-size);
