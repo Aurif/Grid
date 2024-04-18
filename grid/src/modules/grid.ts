@@ -1,7 +1,6 @@
 import type { ContextCall } from '@/common/core/commands/context'
 import type Entity from '@/common/core/commands/entity'
-import { DormantComponent } from '@/common/core/slots/dormant-component'
-import { publish } from '@/common/core/slots/render-slots'
+import { publishRootSlot } from '@/common/core/slots/root-slot'
 import delayedRef from '@/common/utils/delayed-ref'
 import type { ComponentRef, DelayedComponentRef } from '@/common/utils/types'
 import MultiInputProxy from '@/content/input/multi-input-proxy'
@@ -15,8 +14,7 @@ export default function () {
   const gridRendererRef = delayedRef() as DelayedComponentRef<typeof GridRenderer>
   const gridRendererProxy = new GridRendererProxy(gridRendererRef)
   const { rows, columns } = determinePositioning(gridRendererProxy.parentElement)
-  const gridRenderer = new DormantComponent(GridRenderer, { rows, columns })
-  publish(gridRenderer)
+  const gridRenderer = publishRootSlot(GridRenderer, { rows, columns })
   gridRendererRef.bind(gridRenderer.ref as ComponentRef<typeof GridRenderer>)
 
   const gridUpdater = new GridUpdater(gridRendererProxy)
@@ -45,6 +43,7 @@ export default function () {
     gridInputProxy,
     hideFromGrid,
     rows,
-    columns
+    columns,
+    gridRenderer
   }
 }

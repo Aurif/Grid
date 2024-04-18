@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { renderFunction } from '@/common/core/slots/render-slots'
+  import { renderFunction } from '@/common/core/slots/root-slot'
 
   export default {
     setup() {

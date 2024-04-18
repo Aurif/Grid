@@ -2,7 +2,7 @@
   import ConstantFocusField from '@/common/components/ConstantFocusField.vue'
   import { computed, type Ref } from 'vue'
 
-  const emit = defineEmits(['onNewEntry'])
+  const emit = defineEmits(['newEntry'])
   let props = defineProps<{
     rows: Ref<number>
   }>()
@@ -16,7 +16,7 @@
     <ConstantFocusField
       :required="true"
       :style="{ '--input-font-size': inputHeight + 'px' }"
-      @on-input="emit('onNewEntry', $event)"
+      @on-input="emit('newEntry', $event)"
     />
   </div>
 </template>

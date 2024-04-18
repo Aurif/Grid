@@ -1,6 +1,8 @@
+import SlotOverlay from '@/common/components/slots/SlotOverlay.vue'
 import { Command } from '@/common/core/commands/command'
-import { ContextClass, blankContext, type ContextCall } from '@/common/core/commands/context'
+import { blankContext, ContextClass, type ContextCall } from '@/common/core/commands/context'
 import type Entity from '@/common/core/commands/entity'
+import type { SlottedComponent } from '@/common/core/slots/slotted-component'
 import type DataStore from '@/common/data/data-store'
 import type { Entry } from '@/common/utils/types'
 import type MultiInputProxy from '@/content/input/multi-input-proxy'
@@ -9,6 +11,7 @@ import ModelScatter from '@/content/model/model-scatter'
 import type StateDisplay from '@/content/model/state-display'
 import StateEntries from '@/content/model/state-entries'
 import GridUpdater from '@/content/view/grid/grid-updater'
+import InputRenderer from '@/content/view/InputGlobalRenderer.vue'
 import type { Ref } from 'vue'
 
 export default function ({
@@ -16,15 +19,17 @@ export default function ({
   displayState,
   gridUpdater,
   hideFromGrid,
-  dataStore
+  rows,
+  dataStore,
+  gridRenderer
 }: {
   gridInputProxy: MultiInputProxy
   displayState: StateDisplay
   gridUpdater: GridUpdater
   hideFromGrid: (call: ContextCall, target: Entity) => void
-  columns: Ref<number>
   rows: Ref<number>
   dataStore: DataStore<{ [id: string]: Entry<{ value: string }> }>
+  gridRenderer: SlottedComponent<any>
 }) {
   const entryCreationContext = new ContextClass<null>()
   const entryContext = new ContextClass<Entry<{ value: string }>>()
@@ -32,6 +37,12 @@ export default function ({
   const memoryState = new StateEntries<{ value: string }>(dataStore, entryContext)
   displayState.reader.watchResize(() => {
     blankContext()(memoryState.rebroadcast, {})
+  })
+  gridRenderer.publishSlot(SlotOverlay, InputRenderer, {
+    rows,
+    onNewEntry: (event) => {
+      entryCreationContext.make(null)(memoryState.addEntry, { entry: { value: event } })
+    }
   })
 
   const scatterInputProxy = gridInputProxy.subset().on(InputClickDouble(), (target) => {
